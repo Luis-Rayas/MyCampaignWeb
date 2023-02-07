@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateMunicipalitiesTable extends Migration
+class MunicipalitiesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -17,7 +17,7 @@ class CreateMunicipalitiesTable extends Migration
             $table->id();
             $table->string('name', 60);
             $table->smallInteger('number');
-            
+
             $table->timestamps();
             $table->softDeletes();
         });

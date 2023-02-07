@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateVolunteersTable extends Migration
+class VolunteersTable extends Migration
 {
     /**
      * Run the migrations.
@@ -23,7 +23,7 @@ class CreateVolunteersTable extends Migration
             $table->string('phone', 20);
 
             $table->foreignId('section_id')->constrained();
-            $table->foreignId('sympathizer_id')->constrained();
+            $table->foreignId('user_id')->constrained();
             $table->foreignId('campaign_id')->constrained();
 
             $table->timestamps();

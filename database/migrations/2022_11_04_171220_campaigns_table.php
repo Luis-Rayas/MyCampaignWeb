@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateCampaignsTable extends Migration
+class CampaignsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -18,16 +18,15 @@ class CreateCampaignsTable extends Migration
 
             $table->string('name', 50);
             $table->string('party', 50); // Partido politico
+            $table->string('img_path', 1024)->nullable();
             $table->string('description', 1024)->nullable();
             $table->date('start_date');
             $table->date('end_date');
 
+            $table->foreignId('user_id')->constrained();
+
             $table->timestamps();
             $table->softDeletes();
-        });
-
-        Schema::table('administrators', function (Blueprint $table) {
-            $table->foreign('current_campaign')->references('id')->on('campaigns');
         });
     }
 

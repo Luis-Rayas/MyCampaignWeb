@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateAdministratorsTable extends Migration
+return new class extends Migration
 {
     /**
      * Run the migrations.
@@ -13,15 +13,10 @@ class CreateAdministratorsTable extends Migration
      */
     public function up()
     {
-        Schema::create('administrators', function (Blueprint $table) {
+        Schema::create('type_user_pivot', function ($table) {
             $table->id();
-
-            $table->string('name', 120);
-
-            $table->unsignedBigInteger('current_campaign')->nullable();
-
-            $table->timestamps();
-            $table->softDeletes();
+            $table->foreignId('user_id')->constrained();
+            $table->foreignId('type_user_id')->constrained();
         });
     }
 
@@ -32,6 +27,6 @@ class CreateAdministratorsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('administrators');
+        //
     }
-}
+};

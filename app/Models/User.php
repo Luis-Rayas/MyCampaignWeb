@@ -62,11 +62,15 @@ class User extends Authenticatable
 
     public function adminlte_image()
     {
-        return 'https://picsum.photos/300/300';
+
+        // return '/vendor/adminlte/dist/img/userIcon.png';
+        return $this->getProfilePhotoUrlAttribute();
+
     }
 
     public function adminlte_desc()
     {
+
         return 'That\'s a nice guy';
     }
 

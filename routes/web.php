@@ -1,6 +1,8 @@
 <?php
 
+use App\Http\Controllers\CampaignsController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UnAuthorizedController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -30,5 +32,13 @@ Route::middleware([
     Route::get('/dashboard', function () {
         return view('dashboard');
     })->name('dashboard');
+});
+
+Route::prefix('campaig')->group(function() {
+    Route::get('/', [CampaignsController::class, 'index'])->name('campaign.index');
+});
+
+Route::prefix('profile')->group(function() {
+    Route::get('/', [ProfileController::class, 'index'])->name('profile.show');
 });
 

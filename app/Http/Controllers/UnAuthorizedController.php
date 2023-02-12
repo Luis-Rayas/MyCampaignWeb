@@ -5,18 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 
-class HomeController extends Controller
+class UnAuthorizedController extends Controller
 {
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        $this->middleware('auth');
-    }
-
     /**
      * Show the application dashboard.
      *
@@ -24,6 +14,7 @@ class HomeController extends Controller
      */
     public function index()
     {
-        return view('dashboard');
+        $cantAdmins = User::whereRelation('typeUser', 'type_user_id','=', 1)->get();
+        return view('welcome')->with(['existAdmin' => $cantAdmins->count() == 0 ? false : true ]);
     }
 }

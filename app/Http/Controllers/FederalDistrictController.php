@@ -4,9 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 
-class CampaignsController extends Controller
+class FederalDistrictController extends Controller
 {
-    /**
+        /**
      * Create a new controller instance.
      *
      * @return void
@@ -21,6 +21,6 @@ class CampaignsController extends Controller
      */
     public function index()
     {
-        return view('campaigns.index');
+
     }
 }

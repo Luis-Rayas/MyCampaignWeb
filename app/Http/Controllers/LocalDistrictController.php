@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 
-class CampaignsController extends Controller
+class LocalDistrictController extends Controller
 {
     /**
      * Create a new controller instance.
@@ -16,11 +16,11 @@ class CampaignsController extends Controller
         $this->middleware('auth');
     }
 
-    /**
+        /**
      * Return the index view
      */
     public function index()
     {
-        return view('campaigns.index');
+
     }
 }

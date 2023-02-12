@@ -72,7 +72,7 @@ class User extends Authenticatable
 
     public function adminlte_profile_url()
     {
-        return 'home.index';
+        return '/profile';
     }
 
     //Relationships

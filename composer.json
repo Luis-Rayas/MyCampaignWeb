@@ -9,6 +9,7 @@
         "components/font-awesome": "^6.2",
         "guzzlehttp/guzzle": "^7.2",
         "jeroennoten/laravel-adminlte": "^3.8",
+        "kartik-v/bootstrap-fileinput": "@dev",
         "laravel/framework": "^9.19",
         "laravel/jetstream": "^2.16",
         "laravel/sanctum": "^3.0",

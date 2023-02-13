@@ -7,7 +7,11 @@
 @stop
 
 @section('content')
-    <p>Welcome to this beautiful admin panel.</p>
+    @if (isset($campaiign))
+        <h1>holi</h1>
+    @else
+        <h1>no holi</h1>
+    @endif
 @stop
 
 @section('css')

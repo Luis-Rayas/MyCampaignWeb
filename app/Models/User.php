@@ -68,13 +68,13 @@ class User extends Authenticatable
 
     }
 
-    public function adminlte_desc()
+    public function adminlte_desc() : string
     {
 
         return 'That\'s a nice guy';
     }
 
-    public function adminlte_profile_url()
+    public function adminlte_profile_url() : string
     {
         return '/profile';
     }

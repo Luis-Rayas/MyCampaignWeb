@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 
 class CampaignsController extends Controller
@@ -22,5 +23,13 @@ class CampaignsController extends Controller
     public function index()
     {
         return view('campaigns.index');
+    }
+
+    /**
+     * Return the create view
+     */
+    public function create() : View
+    {
+        return view('campaigns.create');
     }
 }

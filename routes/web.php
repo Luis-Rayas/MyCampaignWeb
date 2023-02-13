@@ -37,6 +37,7 @@ Route::middleware([
 Route::prefix('campaig')->group(function() {
     Route::get('/', [CampaignsController::class, 'index'])->name('campaign.index');
     Route::get('/create', [CampaignsController::class, 'create'])->name('campaign.create');
+    Route::post('/store', [CampaignsController::class, 'store'])->name('campaign.store');
 });
 
 Route::prefix('profile')->group(function() {

@@ -31,8 +31,8 @@
             </div>
             <div class="card-body">
                 <div class="mb-3">
-                    <label for="partido" class="form-label">Partido</label>
-                    <input type="text" class="form-control" id="partido" value="{{ old('party') }}" name="party" />
+                    <label for="partido" class="form-label">Partido*</label>
+                    <input type="text" class="form-control" id="partido" required value="{{ old('partido') }}" name="partido" />
                 </div>
                 <div class="mb-3">
                     <div class="row">
@@ -49,8 +49,8 @@
                     </div>
                 </div>
                 <div class="mb-3">
-                    <label for="commentarios" class="form-label @error('commentarios') is-invalid @enderror">Comentarios</label>
-                    <textarea class="form-control" id="commentarios" rows="3" value="{{ old('commentarios') }}" name="commentarios"></textarea>
+                    <label for="descripcion" class="form-label @error('descripcion') is-invalid @enderror">Descripción</label>
+                    <textarea class="form-control" id="descripcion" rows="3" value="{{ old('descripcion') }}" name="descripcion"></textarea>
                 </div>
                 <button type="submit" class="btn btn-primary form-control">Guardar</button>
             </div>

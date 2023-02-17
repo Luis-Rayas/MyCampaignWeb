@@ -20,19 +20,9 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', [UnAuthorizedController::class, 'index'])->name('root');
 
-Route::get('/home', [HomeController::class, 'index'])->name('home');
+Route::get('/dashboard', [HomeController::class, 'index'])->name('home');
 
-Auth::routes();
-
-Route::middleware([
-    'auth:sanctum',
-    config('jetstream.auth_session'),
-    'verified'
-])->group(function () {
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
-});
+// Auth::routes();
 
 Route::prefix('campaig')->group(function() {
     Route::get('/', [CampaignsController::class, 'index'])->name('campaign.index');
@@ -41,6 +31,6 @@ Route::prefix('campaig')->group(function() {
 });
 
 Route::prefix('profile')->group(function() {
-    Route::get('/', [ProfileController::class, 'index'])->name('profile.show');
+    Route::get('/', [ProfileController::class, 'index'])->name('profile.index');
 });
 

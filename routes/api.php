@@ -15,19 +15,13 @@ use Illuminate\Support\Facades\Route;
 */
 
 // Route::post('auth/login', [AuthController::class, 'login']);
+// Route::post('auth/logout', [AuthController::class, 'logout']);
+// Route::post('auth/me', [AuthController::class, 'me'])->middleware('jwt');
 
-Route::group([
-    'prefix' => 'auth'
-], function ($router) {
-    Route::post('login', [AuthController::class => 'login']);
+Route::middleware('jwt')->prefix('auth')->group(function() {
+    Route::post('login', [AuthController::class, 'login']);
+    Route::post('logout', [AuthController::class, 'logout']);
+    Route::post('refresh', [AuthController::class, 'refresh']);
+    Route::post('me', [AuthController::class,'me']);
 });
 
-Route::group([
-    'middleware' => 'api',
-    'prefix' => 'auth'
-], function ($router) {
-    // Route::post('login', [AuthController::class => 'login']);
-    Route::post('logout', [AuthController::class => 'logout']);
-    Route::post('refresh', [AuthController::class => 'refresh']);
-    Route::post('me', [AuthController::class => 'me']);
-});

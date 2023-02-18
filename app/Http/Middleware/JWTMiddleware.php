@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use PHPOpenSourceSaver\JWTAuth\Exceptions\TokenExpiredException;
 use PHPOpenSourceSaver\JWTAuth\Exceptions\TokenInvalidException;
 use PHPOpenSourceSaver\JWTAuth\Facades\JWTAuth;
+use Symfony\Component\HttpFoundation\Response;
 
 class JWTMiddleware
 {
@@ -23,11 +24,11 @@ class JWTMiddleware
             $user = JWTAuth::parseToken()->authenticate();
         } catch (Exception $e) {
             if ($e instanceof TokenInvalidException){
-                return response()->json(['status' => 'error', 'message' => 'Token inválido']);
+                return response()->json(['status' => 'error', 'message' => 'Token inválido'], Response::HTTP_UNAUTHORIZED);
             }else if ($e instanceof TokenExpiredException){
-                return response()->json(['status' => 'error', 'message' => 'Token expirado']);
+                return response()->json(['status' => 'error', 'message' => 'Token expirado'], Response::HTTP_UNAUTHORIZED);
             }else{
-                return response()->json(['status' => 'error', 'message' => 'Token no proporcionado']);
+                return response()->json(['status' => 'error', 'message' => 'Token no proporcionado'], Response::HTTP_UNAUTHORIZED);
             }
         }
         return $next($request);

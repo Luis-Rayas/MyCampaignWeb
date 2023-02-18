@@ -24,12 +24,13 @@ class AuxVolunteersTable extends Migration
             $table->string('elector_key', 18)->unique();
             $table->boolean('local_voting_booth'); // Va a defender la casilla en la seccion
 
-            $table->foreignId('type_volunteer_id')->constrained();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
 
             $table->timestamps();
             $table->softDeletes();
         });
+
+        // La clave foranea type_volunteer_id Se crea junto con la tabla de type volunteer
     }
 
     /**

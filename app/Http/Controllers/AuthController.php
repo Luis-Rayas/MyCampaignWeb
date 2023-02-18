@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use PHPOpenSourceSaver\JWTAuth\Facades\JWTAuth;
+use PHPOpenSourceSaver\JWTAuth\Facades\JWTFactory;
+use PHPOpenSourceSaver\JWTAuth\JWTGuard;
 
 class AuthController extends Controller
 {
@@ -30,8 +33,15 @@ class AuthController extends Controller
 
         if (Auth::attempt($credentials)) {
             $token = JWTAuth::fromUser(Auth::user());
+            $expiresIn = Carbon::now();
+            $expiresIn->addMinutes(JWTFactory::getTTL());
             return response()->json(
-                ['token' => $token]
+                [
+                    'user' => Auth::user(),
+                    'token' => $token,
+                    'tokenType' => 'bearer',
+                    'expiresIn' => $expiresIn->toDateTimeString()
+                ]
             );
         }
 
@@ -57,31 +67,5 @@ class AuthController extends Controller
     {
         auth()->logout();
         return response()->json(['message' => 'Successfully logged out']);
-    }
-
-    /**
-     * Refresh a token.
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function refresh()
-    {
-        return $this->respondWithToken(auth()->refresh());
-    }
-
-    /**
-     * Get the token array structure.
-     *
-     * @param  string $token
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
-    protected function respondWithToken($token)
-    {
-        return response()->json([
-            'access_token' => $token,
-            'token_type' => 'bearer',
-            'expires_in' => auth()->factory()->getTTL() * 60
-        ]);
     }
 }

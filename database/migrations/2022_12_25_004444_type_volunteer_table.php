@@ -13,6 +13,7 @@ class TypeVolunteerTable extends Migration
      */
     public function up()
     {
+        Schema::dropIfExists('type_volunteers');
         Schema::create('type_volunteers', function (Blueprint $table) {
             $table->id();
 
@@ -20,6 +21,10 @@ class TypeVolunteerTable extends Migration
 
             $table->timestamps();
             $table->softDeletes();
+        });
+
+        Schema::table('aux_volunteers', function (Blueprint $table) {
+            $table->foreignId('type_volunteer_id')->constrained();
         });
     }
 
@@ -30,6 +35,6 @@ class TypeVolunteerTable extends Migration
      */
     public function down()
     {
-        //
+        Schema::dropIfExists('type_volunteers');
     }
 }

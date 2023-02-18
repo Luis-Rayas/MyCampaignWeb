@@ -7,18 +7,8 @@ use Illuminate\Http\Request;
 class UserController extends Controller
 {
     /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        $this->middleware('auth');
-    }
-
-        /**
-     * Return the index view
-     */
+    * Return the index view
+    */
     public function index()
     {
 

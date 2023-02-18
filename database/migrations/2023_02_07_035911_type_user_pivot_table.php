@@ -13,6 +13,7 @@ return new class extends Migration
      */
     public function up()
     {
+        Schema::dropIfExists('type_user_pivot');
         Schema::create('type_user_pivot', function ($table) {
             $table->id();
             $table->foreignId('user_id')->constrained();
@@ -27,6 +28,6 @@ return new class extends Migration
      */
     public function down()
     {
-        //
+        Schema::dropIfExists('type_user_pivot');
     }
 };

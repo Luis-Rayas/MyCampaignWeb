@@ -2,24 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\FederalDistrict;
+use App\Models\Municipality;
+use App\Models\Section;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response as HttpStatus;
 use Illuminate\Support\Facades\Validator;
 
-class FederalDistrictController extends Controller
+class MunicipalityController extends Controller
 {
-    /**
-     * Return the index view
-     */
-    public function index()
-    {
-
-    }
-
-    //API Functions
-    public function getFederalDistrictsByState(Request $request)
+    //API functions
+    public function getMunicipalitiesByState(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'stateId' => 'required|exists:states,id'
@@ -33,7 +26,7 @@ class FederalDistrictController extends Controller
             return response()->json($response, HttpStatus::HTTP_BAD_REQUEST);
         }
         $safe = $validator->safe();
-        $federalDistricts = FederalDistrict::select(
+        $municipalities = Municipality::select(
             'id',
             'name',
             'number')
@@ -41,7 +34,7 @@ class FederalDistrictController extends Controller
             $query->where('state_id', $safe['stateId']);
         })->get();
         return response()->json(
-            $federalDistricts
+            $municipalities
         );
     }
 }

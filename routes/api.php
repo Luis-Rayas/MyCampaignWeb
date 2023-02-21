@@ -1,6 +1,9 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\FederalDistrictController;
+use App\Http\Controllers\LocalDistrictController;
+use App\Http\Controllers\MunicipalityController;
 use App\Http\Controllers\SectionsController;
 use App\Http\Controllers\StateController;
 use Illuminate\Support\Facades\Route;
@@ -39,15 +42,15 @@ Route::middleware('jwt')->prefix('states')->group(function() {
 Route::middleware('jwt')->prefix('sections')->group(function() {
     Route::get('/', [SectionsController::class, 'getAllSections'])->name('api.sections.getAll');
 });
-/*
+
 Route::middleware('jwt')->prefix('municipalities')->group(function() {
-    Route::get('/', [StateController::class, 'getAllStates'])->name('api.municipalities.getAll');
+    Route::get('/', [MunicipalityController::class, 'getMunicipalitiesByState'])->name('api.municipalities.getAll');
 });
 
 Route::middleware('jwt')->prefix('federal-districts')->group(function() {
-    Route::get('/', [StateController::class, 'getAllStates'])->name('api.federal-districts.getAll');
+    Route::get('/', [FederalDistrictController::class, 'getFederalDistrictsByState'])->name('api.federal-districts.getAll');
 });
 
 Route::middleware('jwt')->prefix('local-districts')->group(function() {
-    Route::get('/', [StateController::class, 'getAllStates'])->name('api.local-districts.getAll');
-});*/
+    Route::get('/', [LocalDistrictController::class, 'getLocalDistrictsByState'])->name('api.local-districts.getAll');
+});

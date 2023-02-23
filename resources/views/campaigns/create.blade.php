@@ -31,21 +31,23 @@
             </div>
             <div class="card-body">
                 <div class="mb-3">
-                    <label for="partido" class="form-label">Partido*</label>
-                    <input type="text" class="form-control" id="partido" required value="{{ old('partido') }}" name="partido" />
-                </div>
-                <div class="mb-3">
                     <div class="row">
+                        <div class="col-6">
+                            <div class="mb-3">
+                                <label for="partido" class="form-label">Partido*</label>
+                                <input type="text" class="form-control" id="partido" required value="{{ old('partido') }}" name="partido" />
+                            </div>
+                        </div>
                         <div class="col-6">
                             <label for="inicio_campania" class="form-label">Inicio De Campaña*</label>
                             <input type="date" class="@error('inicio_campania') is-invalid @enderror form-control" id="inicio_campania" required
                                 value="{{ old('inicio_campania') }}" name="inicio_campania" />
                         </div>
-                        <div class="col-6">
+                        {{-- <div class="col-6">
                             <label for="fin_campania" class="@error('fin_campania') is-invalid @enderror inicio_campania">Fin de Campaña*</label>
                             <input type="date" class="form-control" id="fin_campania" required value="{{ old('fin_campania') }}"
                                 name="fin_campania" />
-                        </div>
+                        </div> --}}
                     </div>
                 </div>
                 <div class="mb-3">

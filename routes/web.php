@@ -24,7 +24,7 @@ Route::get('/dashboard', [HomeController::class, 'index'])->name('home');
 
 // Auth::routes();
 
-Route::prefix('campaig')->group(function() {
+Route::middleware('auth')->prefix('campaig')->group(function() {
     Route::get('/', [CampaignsController::class, 'index'])->name('campaign.index');
 
     Route::get('/create', [CampaignsController::class, 'create'])->name('campaign.create');
@@ -35,7 +35,7 @@ Route::prefix('campaig')->group(function() {
 
     Route::get('/{id}', [CampaignsController::class, 'show'])->name('campaign.show');
 
-    Route::put('/delete}', [CampaignsController::class, 'delete'])->name('campaign.delete');
+    Route::delete('/delete/{id}', [CampaignsController::class, 'delete'])->name('campaign.delete');
 });
 
 Route::prefix('profile')->group(function() {

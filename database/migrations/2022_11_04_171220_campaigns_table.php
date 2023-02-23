@@ -21,7 +21,7 @@ class CampaignsTable extends Migration
             $table->string('img_path', 1024)->nullable();
             $table->string('description', 1024)->nullable();
             $table->date('start_date');
-            $table->date('end_date');
+            $table->date('end_date')->nullable();
 
             $table->foreignId('user_id')->constrained();
 

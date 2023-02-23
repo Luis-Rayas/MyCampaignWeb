@@ -13,13 +13,19 @@ use Illuminate\Support\Facades\Validator;
 class CampaignsController extends Controller
 {
 
+    /**
+     * Return the index view
+     */
     public function index()
     {
         $campaigns = Campaign::all();
+        $canCreateNewCampaign = Campaign::whereNull('end_date')->get()->count() == 0  ? true : false;
         return view('campaigns.index')->with([
-            'campaigns' => $campaigns
+            'campaigns' => $campaigns,
+            'canCreateNewCampaign' => $canCreateNewCampaign
         ]);
     }
+
     /**
      * Return the show view
      */
@@ -41,9 +47,19 @@ class CampaignsController extends Controller
     /**
      * Return the create view
      */
-    public function create(): View
+    public function create()
     {
-        return view('campaigns.create');
+        $canCreateNewCampaign = Campaign::whereNull('end_date')->get()->count() == 0  ? true : false;
+        if ($canCreateNewCampaign) {
+            return view('campaigns.create');
+        }
+        $result = (object) [
+            'status' => 'warning',
+            'message' => 'Hay una campaña en curso, finalice la campaña actual para crear una nueva'
+        ];
+        return redirect()->route('campaign.index')->with([
+            'result' => $result
+        ]);
     }
 
     public function store(Request $request)
@@ -78,10 +94,12 @@ class CampaignsController extends Controller
         return redirect()->route('home')->with(['result' => $result]);
     }
 
+    /**
+     * Return the edit view
+     */
     public function edit(int $id)
     {
         $campaign = Campaign::find($id);
-
         return view('campaigns.edit')->with([
             'campaign' => $campaign
         ]);
@@ -104,7 +122,7 @@ class CampaignsController extends Controller
         $campaign->name = isset($safe['nombre']) ? $safe['nombre'] : null;
         if ($request->file('img_campaign')) {
             $img_path = Storage::disk('public')
-                ->put('img/campaigns/' . $campaign->name . '/logo/', $request->file('img_campaign'));
+                ->put($campaign->img_path, $request->file('img_campaign'));
             $campaign->img_path = $img_path;
         }
         $campaign->party = isset($safe['partido']) ? $safe['partido'] : null;
@@ -146,14 +164,14 @@ class CampaignsController extends Controller
     //API Functions
     public function getCurrentCampaign()
     {
-        $campaigns = Campaign::select([
+        $campaign = Campaign::select([
             'id',
             'name',
             'party',
             'description',
             'start_date',
             'end_date',
-        ])->orderBy('id', 'DESC')->first();
-        return response()->json($campaigns);
+        ])->whereNull('end_date')->orderBy('id', 'DESC')->first();
+        return response()->json($campaign);
     }
 }

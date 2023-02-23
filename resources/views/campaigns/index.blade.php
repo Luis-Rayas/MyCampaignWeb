@@ -15,6 +15,13 @@
             </div>
         @endif
 
+        @if ($canCreateNewCampaign)
+            <div class="text-right">
+                <a class="btn btn-success btn-sm" href="{{ route('campaign.create') }}">
+                    <i class="fa fa-plus"></i> Crear nueva campaña
+                </a>
+            </div>
+        @endif
 
         <div class="table-responsive">
             <table class="table table-sm table-stripped  text-center">

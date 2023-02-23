@@ -26,8 +26,15 @@ Route::get('/dashboard', [HomeController::class, 'index'])->name('home');
 
 Route::prefix('campaig')->group(function() {
     Route::get('/', [CampaignsController::class, 'index'])->name('campaign.index');
+    Route::get('/{id}', [CampaignsController::class, 'show'])->name('campaign.show');
+
     Route::get('/create', [CampaignsController::class, 'create'])->name('campaign.create');
     Route::post('/store', [CampaignsController::class, 'store'])->name('campaign.store');
+
+    Route::get('/edit/{id}', [CampaignsController::class, 'edit'])->name('campaign.edit');
+    Route::put('/update}', [CampaignsController::class, 'update'])->name('campaign.update');
+
+    Route::put('/delete}', [CampaignsController::class, 'delete'])->name('campaign.delete');
 });
 
 Route::prefix('profile')->group(function() {

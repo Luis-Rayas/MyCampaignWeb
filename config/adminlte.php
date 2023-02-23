@@ -84,9 +84,9 @@ return [
     */
 
     'auth_logo' => [
-        'enabled' => false,
+        'enabled' => true,
         'img' => [
-            'path' => 'vendor/adminlte/dist/img/AdminLTELogo.png',
+            'path' => 'storage/img/logo.png',
             'alt' => 'Auth Logo',
             'class' => '',
             'width' => 50,
@@ -109,7 +109,7 @@ return [
     'preloader' => [
         'enabled' => true,
         'img' => [
-            'path' => 'vendor/adminlte/dist/img/AdminLTELogo.png',
+            'path' => 'storage/img/logo.png',
             'alt' => 'AdminLTE Preloader Image',
             'effect' => 'animation_wobble', //or animation__shake
             'width' => 60,
@@ -307,7 +307,7 @@ return [
             'text' => 'Buscar',
         ],
         [
-            'text' => 'Campaña',
+            'text' => 'Campañas',
             'route'  => 'campaign.index',
             'icon' => 'fa-solid fa-campground'
         ],

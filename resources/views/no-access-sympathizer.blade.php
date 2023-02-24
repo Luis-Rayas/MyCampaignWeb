@@ -19,7 +19,7 @@
 
         body {
             font-family: 'Raleway', sans-serif;
-            background-color: #342643;
+            background-color: #2b2b2b;
             height: 100%;
             padding: 10px;
         }
@@ -61,6 +61,25 @@
             padding: 20px;
             color: white;
         }
+
+        .buttons {
+            margin: 30px;
+            font-weight: 700;
+            border: 2px solid #EE4B5E;
+            text-decoration: none;
+            padding: 15px;
+            text-transform: uppercase;
+            color: #EE4B5E;
+            border-radius: 26px;
+            transition: all 0.2s ease-in-out;
+            display: inline-block;
+
+            .buttons:hover {
+                background-color: #EE4B5E;
+                color: white;
+                transition: all 0.2s ease-in-out;
+            }
+        }
     </style>
 
 </head>
@@ -75,9 +94,14 @@
             Oops, No tienes permiso para ver esta pagina.
         </div>
         <div class="isi">
-            Te reconocemos como integrante de la actual campaña de voluntariado para defensor del voto, pero no tienes acceso para acceder a este sitio
-            web, espera indicaciones de tus supervisores/administradores.
+            Te reconocemos como integrante de la actual campaña de voluntariado para defensor del voto, pero no tienes
+            acceso para acceder a este sitio
+            web, espera indicaciones de tus supervisores/administradores. ¿Es un error? Comentalo a los administradores
+            para brindarte ayuda
         </div>
+        {{-- <div class="buttons">
+            <a class="button" href="{{ route('login') }}">Volver al login</a>
+        </div> --}}
     </div>
 </body>
 

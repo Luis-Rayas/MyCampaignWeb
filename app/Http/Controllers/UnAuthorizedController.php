@@ -22,4 +22,9 @@ class UnAuthorizedController extends Controller
             return redirect('/dashboard');
         }
     }
+
+    public function noAccessSympathizer()
+    {
+        return view('no-access-sympathizer');
+    }
 }

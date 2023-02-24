@@ -312,14 +312,20 @@ return [
             'icon' => 'fa-solid fa-campground'
         ],
         [
-            'text' => 'Administradores',
-            'url'  => '/',
-            'icon' => 'fa-solid fa-user-shield'
-        ],
-        [
-            'text' => 'Simpatizantes',
-            'url'  => '/',
-            'icon' => 'fa-solid fa-user'
+            'text' => 'Usuarios',
+            'icon' => 'fa-solid fa-user',
+            'submenu' => [
+                [
+                    'text' => 'Administradores',
+                    'route'  => 'admin.index',
+                    'icon' => 'fa-solid fa-user-shield'
+                ],
+                [
+                    'text' => 'Simpatizantes',
+                    'route'  => 'sympathizer.index',
+                    'icon' => 'fa-solid fa-user'
+                ],
+            ]
         ],
         [
             'text' => 'Voluntarios',

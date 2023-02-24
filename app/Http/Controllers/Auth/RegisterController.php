@@ -42,6 +42,11 @@ class RegisterController extends Controller
         $this->middleware('guest');
     }
 
+    public function showRegistrationForm()
+    {
+        return view('auth.register');
+    }
+
     /**
      * Get a validator for an incoming registration request.
      *
@@ -72,6 +77,7 @@ class RegisterController extends Controller
         $typeUser = TypeUser::where('nombre', 'Administrator')->first();
         $user->save();
         $user->typeUser()->attach($typeUser);
+        $user->save();
         return $user;
     }
 }

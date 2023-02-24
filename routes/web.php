@@ -1,9 +1,12 @@
 <?php
 
+use App\Http\Controllers\AdministratorsController;
 use App\Http\Controllers\CampaignsController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SympathizersController;
 use App\Http\Controllers\UnAuthorizedController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -18,11 +21,12 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', [UnAuthorizedController::class, 'index'])->name('root');
+Route::middleware('guest')->get('/', [UnAuthorizedController::class, 'index'])->name('root');
+Route::middleware('guest')->get('/no-autorized', [UnAuthorizedController::class, 'noAccessSympathizer'])->name('no-access-sympathizer');
 
-Route::get('/dashboard', [HomeController::class, 'index'])->name('home');
+Route::middleware('auth')->get('/dashboard', [HomeController::class, 'index'])->name('home');
 
-// Auth::routes();
+Auth::routes();
 
 Route::middleware('auth')->prefix('campaig')->group(function() {
     Route::get('/', [CampaignsController::class, 'index'])->name('campaign.index');
@@ -38,7 +42,25 @@ Route::middleware('auth')->prefix('campaig')->group(function() {
     Route::delete('/delete/{id}', [CampaignsController::class, 'delete'])->name('campaign.delete');
 });
 
-Route::prefix('profile')->group(function() {
+Route::middleware('auth')->prefix('users')->group(function() {
+    Route::prefix('admin')->group(function() {
+        Route::get('/', [AdministratorsController::class, 'index'])->name('admin.index');
+
+        Route::delete('/delete/{id}', [AdministratorsController::class, 'delete'])->name('admin.delete');
+    });
+
+    Route::prefix('sympathizer')->group(function() {
+        Route::get('/', [SympathizersController::class, 'index'])->name('sympathizer.index');
+
+        Route::delete('/delete/{id}', [SympathizersController::class, 'delete'])->name('sympathizer.delete');
+    });
+
+    Route::get('/create', [UserController::class, 'create'])->name('user.create');
+    Route::post('/store', [UserController::class, 'store'])->name('user.store');
+
+});
+
+Route::middleware('auth')->prefix('profile')->group(function() {
     Route::get('/', [ProfileController::class, 'index'])->name('profile.index');
 });
 

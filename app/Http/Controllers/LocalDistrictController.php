@@ -15,7 +15,10 @@ class LocalDistrictController extends Controller
     */
     public function index()
     {
-
+        $localDistricts = LocalDistrict::select('id', 'name', 'number')->get();
+        return view('local-districts.index')->with([
+            'localDistricts' => $localDistricts
+        ]);
     }
 
     //API Functions

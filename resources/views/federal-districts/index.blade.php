@@ -1,19 +1,39 @@
 @extends('adminlte::page')
 
-@section('title', 'Campaña')
+@section('title', 'Distritos Federales')
 
 @section('content_header')
-    <h1>Campaña</h1>
+    <h1>Distritos Federales</h1>
 @stop
 
 @section('content')
-    <p>Welcome to this beautiful admin panel.</p>
+    <section class="container">
+        <div class="table-responsive">
+            <table class="table table-stripped table-sm text-center" id="table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Número</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($federalDistricts as $federalDistrict)
+                        <tr>
+                            <th>{{ $federalDistrict->id }}</th>
+                            <td>{{ $federalDistrict->name }}</td>
+                            <td>{{ $federalDistrict->number }}</td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    </section>
 @stop
 
 @section('css')
-    <link rel="stylesheet" href="/css/admin_custom.css">
 @stop
 
 @section('js')
-    <script> console.log('Hi!'); </script>
+    <script src="{{ asset('js/federal-districts/federal.index.js') }}" type="text/javascript"></script>
 @stop

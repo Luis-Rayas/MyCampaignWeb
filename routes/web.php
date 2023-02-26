@@ -2,7 +2,9 @@
 
 use App\Http\Controllers\AdministratorsController;
 use App\Http\Controllers\CampaignsController;
+use App\Http\Controllers\FederalDistrictController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\LocalDistrictController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SympathizersController;
 use App\Http\Controllers\UnAuthorizedController;
@@ -58,6 +60,16 @@ Route::middleware('auth')->prefix('users')->group(function() {
     Route::get('/create', [UserController::class, 'create'])->name('user.create');
     Route::post('/store', [UserController::class, 'store'])->name('user.store');
 
+});
+
+Route::middleware('auth')->prefix('districts')->group(function() {
+    Route::prefix('federal')->group(function() {
+        Route::get('/', [FederalDistrictController::class, 'index'])->name('federal.index');
+    });
+
+    Route::prefix('local')->group(function() {
+        Route::get('/', [LocalDistrictController::class, 'index'])->name('local.index');
+    });
 });
 
 Route::middleware('auth')->prefix('profile')->group(function() {

@@ -15,7 +15,10 @@ class FederalDistrictController extends Controller
      */
     public function index()
     {
-
+        $federalDistricts = FederalDistrict::select('id', 'name', 'number')->get();
+        return view('federal-districts.index')->with([
+            'federalDistricts' => $federalDistricts
+        ]);
     }
 
     //API Functions

@@ -338,12 +338,12 @@ return [
             'submenu' => [
                 [
                     'text' => 'Distritos Federales',
-                    'url'  => '/',
+                    'route'  => 'federal.index',
                     'icon' => 'fa-solid fa-map'
                 ],
                 [
                     'text' => 'Distritos Locales',
-                    'url'  => '/',
+                    'route'  => 'local.index',
                     'icon' => 'fa-solid fa-map'
                 ],
             ]
@@ -396,22 +396,22 @@ return [
 
     'plugins' => [
         'Datatables' => [
-            'active' => false,
+            'active' => true,
             'files' => [
                 [
                     'type' => 'js',
                     'asset' => false,
-                    'location' => '//cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js',
+                    'location' => '//cdn.datatables.net/1.13.2/js/jquery.dataTables.min.js',
                 ],
                 [
                     'type' => 'js',
                     'asset' => false,
-                    'location' => '//cdn.datatables.net/1.10.19/js/dataTables.bootstrap4.min.js',
+                    'location' => '//cdn.datatables.net/1.13.2/js/dataTables.bootstrap4.min.js',
                 ],
                 [
                     'type' => 'css',
                     'asset' => false,
-                    'location' => '//cdn.datatables.net/1.10.19/css/dataTables.bootstrap4.min.css',
+                    'location' => '//cdn.datatables.net/1.13.2/css/dataTables.bootstrap4.min.css',
                 ],
             ],
         ],

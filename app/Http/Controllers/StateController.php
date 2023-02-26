@@ -13,7 +13,10 @@ class StateController extends Controller
      */
     public function index()
     {
-
+        $states = State::select('id', 'name')->get();
+        return view('states.index')->with([
+            'states' => $states
+        ]);
     }
 
     //API Methods

@@ -5,7 +5,9 @@ use App\Http\Controllers\CampaignsController;
 use App\Http\Controllers\FederalDistrictController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LocalDistrictController;
+use App\Http\Controllers\MunicipalityController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\StateController;
 use App\Http\Controllers\SympathizersController;
 use App\Http\Controllers\UnAuthorizedController;
 use App\Http\Controllers\UserController;
@@ -70,6 +72,14 @@ Route::middleware('auth')->prefix('districts')->group(function() {
     Route::prefix('local')->group(function() {
         Route::get('/', [LocalDistrictController::class, 'index'])->name('local.index');
     });
+});
+
+Route::middleware('auth')->prefix('states')->group(function() {
+    Route::get('/', [StateController::class, 'index'])->name('state.index');
+});
+
+Route::middleware('auth')->prefix('municipalities')->group(function() {
+    Route::get('/', [MunicipalityController::class, 'index'])->name('municipality.index');
 });
 
 Route::middleware('auth')->prefix('profile')->group(function() {

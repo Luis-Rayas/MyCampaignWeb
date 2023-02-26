@@ -11,6 +11,14 @@ use Illuminate\Support\Facades\Validator;
 
 class MunicipalityController extends Controller
 {
+public function index()
+{
+    $municipalities = Municipality::select('id', 'name', 'number')->get();
+    return view('municipalities.index')->with([
+        'municipalities' => $municipalities
+    ]);
+}
+
     //API functions
     public function getMunicipalitiesByState(Request $request)
     {

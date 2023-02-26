@@ -1,9 +1,9 @@
 @extends('adminlte::page')
 
-@section('title', 'Campaña')
+@section('title', 'Secciones')
 
 @section('content_header')
-    <h1>Campaña</h1>
+    <h1>Secciones</h1>
 @stop
 
 @section('content')
@@ -11,9 +11,9 @@
 @stop
 
 @section('css')
-    <link rel="stylesheet" href="/css/admin_custom.css">
+
 @stop
 
 @section('js')
-    <script> console.log('Hi!'); </script>
+    <script src="{{ asset('js/sections/section.index.js') }}" type="text/javascript"></script>
 @stop

@@ -355,7 +355,12 @@ return [
         ],
         [
             'text' => 'Estados',
-            'url'  => '/',
+            'route'  => 'state.index',
+            'icon' => 'fa-solid fa-flag'
+        ],
+        [
+            'text' => 'Municipios',
+            'route'  => 'municipality.index',
             'icon' => 'fa-solid fa-flag'
         ],
     ],

@@ -7,6 +7,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LocalDistrictController;
 use App\Http\Controllers\MunicipalityController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SectionsController;
 use App\Http\Controllers\StateController;
 use App\Http\Controllers\SympathizersController;
 use App\Http\Controllers\UnAuthorizedController;
@@ -80,6 +81,10 @@ Route::middleware('auth')->prefix('states')->group(function() {
 
 Route::middleware('auth')->prefix('municipalities')->group(function() {
     Route::get('/', [MunicipalityController::class, 'index'])->name('municipality.index');
+});
+
+Route::middleware('auth')->prefix('sections')->group(function() {
+    Route::get('/', [SectionsController::class, 'index'])->name('sections.index');
 });
 
 Route::middleware('auth')->prefix('profile')->group(function() {

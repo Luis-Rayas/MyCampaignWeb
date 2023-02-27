@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Symfony\Component\HttpFoundation\Response as HttpStatus;
 
 class CampaignsController extends Controller
 {
@@ -172,6 +173,9 @@ class CampaignsController extends Controller
             'start_date',
             'end_date',
         ])->whereNull('end_date')->orderBy('id', 'DESC')->first();
+        if($campaign == null){
+            return response()->json($campaign, HttpStatus::HTTP_NO_CONTENT);
+        }
         return response()->json($campaign);
     }
 }

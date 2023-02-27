@@ -356,7 +356,7 @@ return [
         [
             'text' => 'Estados',
             'route'  => 'state.index',
-            'icon' => 'fa-solid fa-flag'
+            'icon' => 'fa-solid fa-city'
         ],
         [
             'text' => 'Municipios',

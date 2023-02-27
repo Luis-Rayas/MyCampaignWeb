@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CampaignsController;
 use App\Http\Controllers\FederalDistrictController;
 use App\Http\Controllers\LocalDistrictController;
 use App\Http\Controllers\MunicipalityController;
@@ -36,6 +37,9 @@ Route::prefix('auth')->group(function() {
 });
 
 //campaign
+Route::middleware('jwt')->prefix('campaigns')->group(function() {
+    Route::get('/', [CampaignsController::class, 'getCurrentCampaign'])->name('api.campaigns.getCampaign');
+});
 //Voluntarios
 
 Route::middleware('jwt')->prefix('states')->group(function() {

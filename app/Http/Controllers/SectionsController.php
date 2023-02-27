@@ -64,11 +64,21 @@ class SectionsController extends Controller
         // Crear un array con la respuesta
         $response = [
             'draw' => $request->input('draw', 1),
-            'recordsTotal' => $sections->total(),
+            'recordsTotal' => Section::count(),
             'recordsFiltered' => $sections->total(),
+            'totalPages' => $sections->lastPage(),
             'data' => $sections->items(),
         ];
 
         return response()->json($response);
+    }
+
+    public function getById(int $id)
+    {
+        $state = Section::find($id);
+        if($state == null){
+            return response()->json($state, HttpStatus::HTTP_NO_CONTENT);
+        }
+        return response()->json($state);
     }
 }

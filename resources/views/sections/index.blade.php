@@ -17,10 +17,15 @@
                     @endforeach
                 </select>
             </div>
+            <div class="col-10">
+                <div class="text-right ">
+                    <button title="Haz clic sobre una casilla para obtener información extra" type="button" class="btn btn-primary btn-tooltip rounded-circle" data-toggle="tooltip" data-placement="bottom"><i class="fa-solid fa-question"></i></button>
+                </div>
+            </div>
         </div>
         <hr style="border: 0; height: 1px; background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0));" />
         <div class="table-responsive">
-            <table class="table table-stripped table-sm" id="table">
+            <table class="table table-stripped table-sm text-center" id="table">
                 <thead>
                     <tr>
                         <th>ID</th>

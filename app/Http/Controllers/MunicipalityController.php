@@ -45,4 +45,13 @@ public function index()
             $municipalities
         );
     }
+
+    public function getById(int $id)
+    {
+        $state = Municipality::find($id);
+        if($state == null){
+            return response()->json($state, HttpStatus::HTTP_NO_CONTENT);
+        }
+        return response()->json($state);
+    }
 }

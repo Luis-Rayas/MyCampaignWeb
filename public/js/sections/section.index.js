@@ -1,38 +1,11 @@
-function fillTable(){
-    let table = $('#table').DataTable();
-
-    let apiRoute = document.getElementById('apiRoute').value;
-
-    let stateId = document.getElementById('state_id').value;
-    let queryParams = new URLSearchParams();
-    queryParams.append("stateId", stateId);
-    queryParams.append("page", table.page.info().page);
-
-    fetch(`${apiRoute}?${queryParams}`,{
-        type: "GET",
-        headers: {
-            "Authorization" : "Bearer" + document.getElementById('jwt').value
-        },
-    })
-    .then(data => data.json())
-    .then(data => {
-        console.log(data);
-        console.log(data.data);
-        let table = $('#table').DataTable();
-        table.clear().draw();
-        table.rows.add(data.data);
-        table.draw();
-        table.page(data.current_page-1).draw('page');
-    })
-    .catch(error => console.error(error));
-}
 
 $(document).ready(function() {
+    $('[data-toggle="tooltip"]').tooltip();
     $('.select').select2({
         theme: "bootstrap4",
         placeholder: "Seleccione una opcion",
     });
-    $('#table').DataTable({
+    var table = $('#table').DataTable({
         responsive: true,
         ordering: false,
         language: {
@@ -71,7 +44,63 @@ $(document).ready(function() {
         "pageLength": 10,
     });
     $('#state_id').on('select2:select', function(){
-        let table = $('#table').DataTable();
         table.ajax.reload().draw();
+    });
+
+    $('#table tbody').on('click', 'td', function() {
+        var tr = $(this);
+        var row = table.row(tr);
+        var rowIdx = table.cell(this).index().row;
+        var colIdx = table.cell(this).index().column;
+        var colName = table.column(colIdx).header().innerText;
+        var cellData = table.cell(rowIdx, colIdx).data();
+
+        let apiRoute = null;
+        switch(colName){
+            case "Estado":
+                apiRoute = "states";
+                break;
+            case "Municipio":
+                apiRoute = "municipalities";
+                break;
+            case "Distrito Local":
+                apiRoute = "local-districts";
+                break;
+            case "Distrito Federal":
+                apiRoute = "federal-districts";
+                break;
+            default:
+                return;
+        }
+        // Verificar si la fila ya tiene una fila hija y eliminarla
+        if (row.child.isShown()) {
+            row.child.hide();
+            tr.removeClass('shown');
+        } else {
+            $.ajax({
+                url: `/api/${apiRoute}/${cellData}`,
+                method: 'GET',
+                headers: {
+                    "Authorization": "Bearer " + document.getElementById('jwt').value
+                },
+                success: function(data) {
+                    console.log(data);
+                    // Actualizar la tabla con la nueva información
+                    /*var newRowData = new Object();
+                    newRowData.id = data.id;
+                    newRowData.name = data.name;
+                    table.row($(this).closest('tr')).data(newRowData).draw();*/
+                    // Construir el HTML de la fila hija con la información adicional
+                    var html = '<div>' + data.name + '</div>';
+
+                    // Añadir la fila hija a la fila principal
+                    row.child(html).show();
+                    tr.addClass('shown');
+                },
+                error: function(xhr, status, error) {
+                    console.log(xhr.responseText);
+                }
+            });
+        }
     });
 });

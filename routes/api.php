@@ -35,22 +35,30 @@ Route::prefix('auth')->group(function() {
     });
 });
 
+//campaign
+//Voluntarios
+
 Route::middleware('jwt')->prefix('states')->group(function() {
     Route::get('/', [StateController::class, 'getAllStates'])->name('api.states.getAll');
+    Route::get('/{id}', [StateController::class, 'getById'])->name('api.states.getById');
 });
 
 Route::middleware('jwt')->prefix('sections')->group(function() {
     Route::get('/', [SectionsController::class, 'getAllSections'])->name('api.sections.getAll');
+    Route::get('/{id}', [SectionsController::class, 'getById'])->name('api.sections.getById');
 });
 
 Route::middleware('jwt')->prefix('municipalities')->group(function() {
     Route::get('/', [MunicipalityController::class, 'getMunicipalitiesByState'])->name('api.municipalities.getAll');
+    Route::get('/{id}', [MunicipalityController::class, 'getById'])->name('api.municipalities.getById');
 });
 
 Route::middleware('jwt')->prefix('federal-districts')->group(function() {
     Route::get('/', [FederalDistrictController::class, 'getFederalDistrictsByState'])->name('api.federal-districts.getAll');
+    Route::get('/{id}', [FederalDistrictController::class, 'getById'])->name('api.federal-districts.getById');
 });
 
 Route::middleware('jwt')->prefix('local-districts')->group(function() {
     Route::get('/', [LocalDistrictController::class, 'getLocalDistrictsByState'])->name('api.local-districts.getAll');
+    Route::get('/{id}', [LocalDistrictController::class, 'getById'])->name('api.local-districts.getById');
 });

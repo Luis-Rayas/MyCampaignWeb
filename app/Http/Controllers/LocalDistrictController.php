@@ -47,4 +47,14 @@ class LocalDistrictController extends Controller
             $localDistricts
         );
     }
+
+
+    public function getById(int $id)
+    {
+        $state = LocalDistrict::find($id);
+        if($state == null){
+            return response()->json($state, HttpStatus::HTTP_NO_CONTENT);
+        }
+        return response()->json($state);
+    }
 }

@@ -44,7 +44,19 @@ class RegisterController extends Controller
 
     public function showRegistrationForm()
     {
-        return view('auth.register');
+        $cantAdmins = User::whereRelation('typeUser', 'type_user_id','=', 1)->get();
+        if($cantAdmins->count() == 0){
+            return view('auth.register');
+        } else {
+            $result = (object) [
+                'status' => 'warning',
+                'message' => 'Actualmente no se aceptan nuevos registros, contacte con su administrador para darlo de alta en el sistema'
+            ];
+            return redirect()->route('login')->with([
+                'result' => $result
+            ]);
+        }
+
     }
 
     /**

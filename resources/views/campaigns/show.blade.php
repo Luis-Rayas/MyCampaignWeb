@@ -26,10 +26,10 @@
                     <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                         <a class="dropdown-item btn-sm" href="{{ route('campaign.edit', $campaign->id) }}"><i
                                 class="fa fa-pen"></i> Editar Campaña</a>
-                        <form action="{{ route('campaign.delete', $campaign->id) }}" method="POST">
+                        <form action="{{ route('campaign.delete', $campaign->id) }}" method="POST" id="deleteForm">
                             @csrf
                             @method('DELETE')
-                            <button type="submit" class="dropdown-item btn-sm" onclick="return confirm('¿Estás seguro?')">
+                            <button type="submit" class="dropdown-item btn-sm" id="btnFinishCampaign">
                                 <i class="fa fa-trash"></i>
                                 Finalizar campaña
                             </button>
@@ -88,5 +88,5 @@
 @stop
 
 @section('js')
-
+    <script src="{{ asset('js/campaigns/campaign.view.js') }}"></script>
 @stop

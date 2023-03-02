@@ -16,7 +16,7 @@
         <a class="btn btn-success" href="{{ route('user.create') }}"><i class="fa fa-plus"></i> Añadir Nuevo Usuario</a>
     </div>
     <section class="table-responsive">
-        <table class="table table-stripped table-sm text-center">
+        <table class="table table-stripped table-sm text-center" id="table">
             <thead class="table-dark">
                 <tr>
                     <th>ID</th>
@@ -54,7 +54,5 @@
 @stop
 
 @section('js')
-    <script>
-        console.log('Hi!');
-    </script>
+    <script src="{{ asset('js/sympathizer/sympathizer.index.js') }}"></script>
 @stop

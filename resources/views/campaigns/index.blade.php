@@ -24,7 +24,7 @@
         @endif
 
         <div class="table-responsive">
-            <table class="table table-sm table-stripped  text-center">
+            <table class="table table-sm table-stripped  text-center" id="table">
                 <thead class="table-dark">
                     <th>ID</th>
                     <th>Nombre</th>
@@ -62,5 +62,5 @@
 @stop
 
 @section('js')
-
+    <script src="{{ asset('js/campaigns/campaign.index.js') }}"></script>
 @stop

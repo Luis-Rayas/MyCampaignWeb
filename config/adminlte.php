@@ -329,7 +329,7 @@ return [
         ],
         [
             'text' => 'Voluntarios',
-            'url'  => '/',
+            'route'  => 'volunteers.index',
             'icon' => 'fa-solid fa-users-line'
         ],
         [

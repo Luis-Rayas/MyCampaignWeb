@@ -22,9 +22,12 @@ class AuxVolunteer extends Model
         'type',
         'elector_key',
         'local_voting_booth',
-        'volunteer_id',
     ];
 
+    public function typeVolunteer()
+    {
+        return $this->hasOne(TypeUser::class);
+    }
     public function volunteer() {
         return $this->belongsTo(Volunteer::class);
     }

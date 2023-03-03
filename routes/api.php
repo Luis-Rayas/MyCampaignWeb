@@ -7,6 +7,7 @@ use App\Http\Controllers\LocalDistrictController;
 use App\Http\Controllers\MunicipalityController;
 use App\Http\Controllers\SectionsController;
 use App\Http\Controllers\StateController;
+use App\Http\Controllers\VolunteerController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -41,6 +42,9 @@ Route::middleware('jwt')->prefix('campaigns')->group(function() {
     Route::get('/', [CampaignsController::class, 'getCurrentCampaign'])->name('api.campaigns.getCampaign');
 });
 //Voluntarios
+Route::middleware('jwt')->prefix('volunteers')->group(function() {
+    Route::get('/', [VolunteerController::class, 'getAllVolunteers'])->name('api.volunteers.getAllVolunteers');
+});
 
 Route::middleware('jwt')->prefix('states')->group(function() {
     Route::get('/', [StateController::class, 'getAllStates'])->name('api.states.getAll');

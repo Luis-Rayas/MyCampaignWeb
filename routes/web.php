@@ -12,6 +12,7 @@ use App\Http\Controllers\StateController;
 use App\Http\Controllers\SympathizersController;
 use App\Http\Controllers\UnAuthorizedController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\VolunteerController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -85,6 +86,11 @@ Route::middleware('auth')->prefix('municipalities')->group(function() {
 
 Route::middleware('auth')->prefix('sections')->group(function() {
     Route::get('/', [SectionsController::class, 'index'])->name('sections.index');
+});
+
+Route::middleware('auth')->prefix('volunteers')->group(function() {
+    Route::get('/', [VolunteerController::class, 'index'])->name('volunteers.index');
+    Route::get('/{id}', [VolunteerController::class, 'show'])->name('volunteers.show');
 });
 
 Route::middleware('auth')->prefix('profile')->group(function() {

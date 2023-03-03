@@ -25,12 +25,15 @@ class TypeVolunteerTable extends Migration
         });
         //TODO Cambiar esto por la ejecucion del seeder
         $type = new TypeVolunteer();
+        $type->id = 0;
         $type->name = 'Representante general';
         $type->save();
         $type = new TypeVolunteer();
+        $type->id = 1;
         $type->name = 'Representante casilla';
         $type->save();
         $type = new TypeVolunteer();
+        $type->id = 2;
         $type->name = 'Otro';
         $type->save();
 

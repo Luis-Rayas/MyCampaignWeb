@@ -18,22 +18,19 @@ class TypeVolunteerTable extends Migration
         Schema::create('type_volunteers', function (Blueprint $table) {
             $table->id();
 
-            $table->string('name', 25);// 0 -> Representante general, 1 -> Representante de casilla, 2 -> Otro
+            $table->string('name', 25);// 1 -> Representante general, 2 -> Representante de casilla, 3 -> Otro
 
             $table->timestamps();
             $table->softDeletes();
         });
         //TODO Cambiar esto por la ejecucion del seeder
         $type = new TypeVolunteer();
-        $type->id = 0;
         $type->name = 'Representante general';
         $type->save();
         $type = new TypeVolunteer();
-        $type->id = 1;
         $type->name = 'Representante casilla';
         $type->save();
         $type = new TypeVolunteer();
-        $type->id = 2;
         $type->name = 'Otro';
         $type->save();
 

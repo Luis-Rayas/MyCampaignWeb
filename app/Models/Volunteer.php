@@ -20,7 +20,7 @@ class Volunteer extends Model
         'email',
         'phone',
         'section_id',
-        'sympathizer_id',
+        'user_id',
         'campaign_id',
     ];
 

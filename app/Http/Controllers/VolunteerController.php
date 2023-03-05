@@ -2,12 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Address;
+use App\Models\AuxVolunteer;
 use App\Models\Campaign;
+use App\Models\FederalDistrict;
+use App\Models\LocalDistrict;
 use App\Models\Municipality;
 use App\Models\Section;
 use App\Models\TypeUser;
 use App\Models\User;
 use App\Models\Volunteer;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response as HttpStatus;
 use Illuminate\Support\Facades\Auth;
@@ -107,7 +112,7 @@ class VolunteerController extends Controller
         $stateValidation = $this->stateValidation($volunteerRequest['section']['state']);
         if($stateValidation['valid'] == false){
             $response = (object) [
-                'entity' => [
+                'entities' => [
                     (object) [
                         'name' => 'state',
                         'message' => $stateValidation['message']
@@ -143,10 +148,67 @@ class VolunteerController extends Controller
             ];
             return response()->json($response, HttpStatus::HTTP_BAD_REQUEST);
         }
+        //Section
+        $sectionValidation = $this->sectionValidation(
+            $stateValidation['entity']->id,
+            $municipalityValidation['entity']->id,
+            $localDistricValidation['entity']->id,
+            $federalDistricValidation['entity']->id,
+            $volunteerRequest['section']
+        );
+        if($sectionValidation['valid'] == false){
+            $response = (object) [
+                'entities' => [
+                    (object) [
+                        'name' => 'section',
+                        'message' => $sectionValidation['message']
+                    ]
+                ]
+            ];
+            return response()->json($response, HttpStatus::HTTP_BAD_REQUEST);
+        }
         //----------------------------------------------
-        dump($volunteerRequest['section']['municipality']['id']);
-        dd($volunteerRequest);
+        $campaign = Campaign::whereNull('end_date')->first();
 
+        DB::beginTransaction();
+        try {
+            $volunteer = Volunteer::create([
+                'name' => $volunteerRequest['name'],
+                'fathers_lastname' => $volunteerRequest['fathersLastname'],
+                'mothers_lastname' => $volunteerRequest['mothersLastname'],
+                'email' => $volunteerRequest['email'],
+                'phone' => $volunteerRequest['phone'],
+                'section_id' => $sectionValidation['entity']->id,
+                'user_id' => Auth::id(),
+                'campaign_id' => $campaign->id,
+            ]);
+
+            $address = Address::create([
+                'street' => $volunteerRequest['address']['street'],
+                'external_number' => $volunteerRequest['address']['externalNumber'],
+                'internal_number' => $volunteerRequest['address']['internalNumber'],
+                'suburb' => $volunteerRequest['address']['suburb'],
+                'zipcode' => $volunteerRequest['address']['zipcode'],
+                'volunteer_id' => $volunteer->id,
+            ]);
+
+            $AuxVolunteer = AuxVolunteer::create([
+                //'image_path_ine' => $nameImageCredential,
+                //'image_path_firm' => $nameImageFirm,
+                'birthdate' => Carbon::create($volunteerRequest['birthdate']['year'],$volunteerRequest['birthdate']['month'], $volunteerRequest['birthdate']['day']),
+                'sector' => $volunteerRequest['sector'],
+                'type_volunteer_id' => $volunteerRequest['type'],
+                'notes' => $volunteerRequest['notes'],
+                'elector_key' => $volunteerRequest['electorKey'],
+                'local_voting_booth' => $volunteerRequest['localVotingBooth'],
+                'volunteer_id' => $volunteer->id,
+            ]);
+            DB::rollBack();
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            throw $th;
+        }
+        dd($volunteerRequest);
     }
 
     //Validations
@@ -220,7 +282,7 @@ class VolunteerController extends Controller
                     $result['message'] = $municipalityDB[0]; //El objeto que resulto
                 }
                 return $result;
-            case 2: //Ambos parametros concuerdan
+            default: //Ambos parametros concuerdan
                 //envio el primer objeto que encontro
                 $result['valid'] = false;
                 $result['message'] = $municipalityDB[0]; //El objeto que resulto
@@ -231,96 +293,120 @@ class VolunteerController extends Controller
 
     private function localDistrictValidation(array $localDistrict, int $stateId) : array
     {
-        $localDistricName = DB::table('local_districts')
-        ->select('local_districts.id', 'local_districts.number', 'local_districts.name')
-        ->join('sections', 'sections.local_district_id', '=', 'local_districts.id')
-        ->where('name', 'LIKE', $localDistrict['name'])
-        ->where('sections.state_id', $stateId);
-
-        $localDistricDB = DB::table('local_districts')
-        ->select('local_districts.id', 'local_districts.number', 'local_districts.name')
-        ->join('sections', 'sections.local_district_id', '=', 'local_districts.id')
-        ->where('number', $localDistrict['number'])
-        ->where('sections.state_id', $stateId)
-        ->union($localDistricName)
-        ->get();
-
         $result = array();
 
-        switch($localDistricDB->count()){
-            case 0: //No concuerda ni el ID ni el nombre
-                //estado con ID 0 por peticion del cliente
-                $result['valid'] = false;
-                $result['message'] = 0;
+        if($localDistrict['id'] != 0){
+            $localDistricDB = LocalDistrict::find($localDistrict['id']);
+            if($localDistricDB->name == $localDistrict['name'] && $localDistricDB->number == $localDistrict['number']){ //Todo concuerda
+                $result['valid'] = true;
+                $result['entity'] = $localDistricDB;
                 return $result;
-            case 1: //Al menos 1 de los parametros concuerda
-                if($localDistricDB[0]->number == $localDistrict['number'] && $localDistricDB[0]->name == $localDistrict['name']) {//Si ambos parametros concuerda, pasa
-                    $result['valid'] = true;
-                    $result['entity'] = $localDistricDB[0];
-                } else { //sino error
-                    $result['valid'] = false;
-                    $result['message'] = $localDistricDB[0]; //El objeto que resulto
-                }
-                return $result;
-            case 2: //Ambos parametros concuerdan
-                //envio el primer objeto que encontro
-                $result['valid'] = false;
-                $result['message'] = $localDistricDB[0]; //El objeto que resulto
-                return $result;
+            }
+            $result['valid'] = false;
+            $result['message'] = $localDistricDB;
+            return $result;
         }
+
+        $localDistricPosible = DB::table('local_districts')
+        ->select('local_districts.id', 'local_districts.number', 'local_districts.name')
+        ->join('sections', 'sections.local_district_id', '=', 'local_districts.id')
+        ->where(function($query) use ($localDistrict){
+            $query->where('name', 'LIKE', $localDistrict['name']);
+            $query->orWhere('number', $localDistrict['number']);
+        })
+        ->where('sections.state_id', $stateId)->first();
+
+        $result['valid'] = false;
+        $result['message'] = $localDistricPosible; //El objeto que resulto
         return $result;
     }
 
     private function federalDistrictValidation(array $federalDistrict, int $stateId) : array
     {
-        $federalDistrictName = DB::table('federal_districts')
-        ->select('federal_districts.id', 'federal_districts.number', 'federal_districts.name')
-        ->join('sections', 'sections.federal_district_id', '=', 'federal_districts.id')
-        ->where('name', 'LIKE', $federalDistrict['name'])
-        ->where('sections.state_id', $stateId);
-
-        $federalDistrictsDB = DB::table('federal_districts')
-        ->select('federal_districts.id', 'federal_districts.number', 'federal_districts.name')
-        ->join('sections', 'sections.federal_district_id', '=', 'federal_districts.id')
-        ->where('number', $federalDistrict['number'])
-        ->where('sections.state_id', $stateId)
-        ->union($federalDistrictName)
-        ->get();
-
         $result = array();
 
-        switch($federalDistrictsDB->count()){
-            case 0: //No concuerda ni el ID ni el nombre
-                //estado con ID 0 por peticion del cliente
-                $result['valid'] = false;
-                $result['message'] = 0;
+        if($federalDistrict['id'] != 0){
+            $federalDistrictDB = FederalDistrict::find($federalDistrict['id']);
+            if($federalDistrictDB->name == $federalDistrict['name'] && $federalDistrictDB->number == $federalDistrict['number']){ //Todo concuerda
+                $result['valid'] = true;
+                $result['entity'] = $federalDistrictDB;
                 return $result;
-            case 1: //Al menos 1 de los parametros concuerda
-                if($federalDistrictsDB[0]->number == $federalDistrict['number'] && $federalDistrictsDB[0]->name == $federalDistrict['name']) {//Si ambos parametros concuerda, pasa
-                    $result['valid'] = true;
-                    $result['entity'] = $federalDistrictsDB[0];
-                } else { //sino error
-                    $result['valid'] = false;
-                    $result['message'] = $federalDistrictsDB[0]; //El objeto que resulto
-                }
-                return $result;
-            case 2: //Ambos parametros concuerdan
-                //envio el primer objeto que encontro
-                $result['valid'] = false;
-                $result['message'] = $federalDistrictsDB[0]; //El objeto que resulto
-                return $result;
+            }
+            $result['valid'] = false;
+            $result['message'] = $federalDistrictDB;
+            return $result;
+        }
+
+        $federalDistrictPosible = DB::table('federal_districts')
+        ->select('federal_districts.id', 'federal_districts.number', 'federal_districts.name')
+        ->join('sections', 'sections.federal_district_id', '=', 'federal_districts.id')
+        ->where(function ($query) use ($federalDistrict) {
+            $query->where('name', 'LIKE', $federalDistrict['name']);
+            $query->orWhere('number', $federalDistrict['number']);
+        })
+        ->where('sections.state_id', $stateId)->first();
+
+        if($federalDistrictPosible != null){
+            $result['valid'] = false;
+            $result['message'] = $federalDistrictPosible; //El objeto que resulto
+        } else {
+            $result['valid'] = false;
+            $result['message'] = 0;
         }
         return $result;
     }
 
-    private function sectionValidation(int $stateId, int $municipalityId, int $localDistrictId, int $federalDistrictId, int $section) : array
+    private function sectionValidation(int $stateId, int $municipalityId, int $localDistrictId, int $federalDistrictId, array $section) : array
     {
-        $section = Section::where('state_id', $stateId)
+        $result = array();
+
+        if($section['id'] != 0) {
+            $sectionDB = Section::find($section['id']);
+            if($sectionDB != null && $sectionDB->section == $section['section']){
+                $result['valid'] = true;
+                $result['entity'] = $sectionDB;
+                return $result;
+            }
+            $result['valid'] = false;
+            $result['message'] = $sectionDB;
+            return $result;
+        }
+
+        $sectionDB = Section::where('state_id', $stateId)
         ->where('municipality_id', $municipalityId)
         ->where('local_district_id', $localDistrictId)
         ->where('federal_district_id', $federalDistrictId)
-        ->first();
+        ->where('section', $section['section'])->first();
 
-        return array();
+        if($sectionDB == null) {
+            $sectionDB = Section::where('state_id', $stateId)
+            ->where('municipality_id', $municipalityId)
+            ->where('local_district_id', $localDistrictId)
+            ->where('federal_district_id', $federalDistrictId)
+            ->first();
+
+            if($sectionDB != null){
+                $newSection = new Section();
+                $newSection->section = $section['section'];
+                $newSection->new = true;
+                $newSection->state_id = $stateId;
+                $newSection->municipality_id = $municipalityId;
+                $newSection->local_district_id = $localDistrictId;
+                $newSection->federal_district_id = $federalDistrictId;
+                $newSection->save();
+
+                $result['valid'] = true;
+                $result['entity'] = $newSection;
+                return $result;
+            } else {
+                $result['valid'] = false;
+                $result['message'] = 0;
+            }
+            return $result;
+        }
+
+        $result['valid'] = true;
+        $result['entity'] = $sectionDB;
+        return $result;
     }
 }

@@ -19,9 +19,10 @@ class AuxVolunteer extends Model
         'birthdate',
         'notes',
         'sector',
-        'type',
+        'type_volunteer_id',
         'elector_key',
         'local_voting_booth',
+        'volunteer_id'
     ];
 
     public function typeVolunteer()

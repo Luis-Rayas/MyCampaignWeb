@@ -220,8 +220,8 @@ class VolunteerController extends Controller
             ]);
 
             $AuxVolunteer = AuxVolunteer::create([
-                'image_path_ine' => $this->parseBase64ToFile($volunteerRequest['imageCredential'], $volunteer->id),
-                'image_path_firm' => $this->parseBase64ToFile($volunteerRequest['imageFirm'], $volunteer->id),
+                'image_path_ine' => $this->parseBase64ToFile($volunteerRequest['imageCredential'], true),
+                'image_path_firm' => $this->parseBase64ToFile($volunteerRequest['imageFirm'], false),
                 'birthdate' => Carbon::create($volunteerRequest['birthdate']['year'], $volunteerRequest['birthdate']['month'], $volunteerRequest['birthdate']['day']),
                 'sector' => $volunteerRequest['sector'],
                 'type_volunteer_id' => $volunteerRequest['type'],
@@ -232,7 +232,8 @@ class VolunteerController extends Controller
             ]);
             DB::commit();
         } catch (\Throwable $th) {
-            $this->deleteImages($volunteer->id);
+            $this->deleteImages($AuxVolunteer->image_path_ine);
+            $this->deleteImages($AuxVolunteer->image_path_firm);
             DB::rollBack();
             $response = (object) [
                 'status' => 'error',
@@ -247,18 +248,23 @@ class VolunteerController extends Controller
         return response()->json($response);
     }
 
-    private function deleteImages(int $volunteerId)
+    private function deleteImages(string $path)
     {
-        Storage::disk('private')->deleteDirectory('img'.DIRECTORY_SEPARATOR.'credencials'.DIRECTORY_SEPARATOR.$volunteerId);
+        Storage::disk('private')->delete($path);
     }
 
-    private function parseBase64ToFile(string $base64Str, int $idVolunteer): string
+    private function parseBase64ToFile(string $base64Str, bool $isFirma): string
     {
         // Decodificar la cadena base64 a una cadena binaria
         $image_data = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $base64Str));
 
         // Generar un nombre de archivo único para la imagen
-        $filename = 'img'.DIRECTORY_SEPARATOR.'credencials'.DIRECTORY_SEPARATOR.$idVolunteer.DIRECTORY_SEPARATOR. uniqid() . '.png';
+        if($isFirma){
+            $filename = 'img'.DIRECTORY_SEPARATOR.'credencials'.DIRECTORY_SEPARATOR.'ine'.DIRECTORY_SEPARATOR. uniqid() . '.png';
+        } else {
+            $filename = 'img'.DIRECTORY_SEPARATOR.'credencials'.DIRECTORY_SEPARATOR.'signature'.DIRECTORY_SEPARATOR. uniqid() . '.png';
+        }
+
 
         // Guardar la imagen en el disco privado de Laravel
         Storage::disk('private')->put($filename, $image_data);

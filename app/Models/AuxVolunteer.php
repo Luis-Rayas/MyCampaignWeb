@@ -12,7 +12,7 @@ class AuxVolunteer extends Model
     use SoftDeletes;
 
 
-    protected $hidden = ['created_at', 'updated_at', 'deleted_at'];
+    protected $hidden = ['created_at', 'updated_at', 'deleted_at', 'image_path_ine','image_path_firm'];
     protected $fillable = [
         'image_path_ine',
         'image_path_firm',

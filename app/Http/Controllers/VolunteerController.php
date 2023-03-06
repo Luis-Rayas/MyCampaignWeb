@@ -17,13 +17,14 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response as HttpStatus;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use PHPOpenSourceSaver\JWTAuth\Facades\JWTAuth;
 
 class VolunteerController extends Controller
 {
     /**
-    * Return the index view
-    */
+     * Return the index view
+     */
     public function index()
     {
         $token = JWTAuth::fromUser(Auth::user());
@@ -42,7 +43,7 @@ class VolunteerController extends Controller
     {
         $campaign = Campaign::whereNull('end_date')->first();
 
-        if($campaign == null){
+        if ($campaign == null) {
             $response = (object) [
                 'status' => 'error',
                 'message' => 'No se ha creado ninguna campaña'
@@ -59,15 +60,15 @@ class VolunteerController extends Controller
             type_volunteers.name AS volunteer_type,
             aux.notes"
         )
-        ->join('aux_volunteers AS aux', 'volunteers.id', '=', 'aux.volunteer_id')
-        ->join('type_volunteers', 'aux.type_volunteer_id', '=', 'type_volunteers.id')
-        ->where('campaign_id', $campaign->id);
+            ->join('aux_volunteers AS aux', 'volunteers.id', '=', 'aux.volunteer_id')
+            ->join('type_volunteers', 'aux.type_volunteer_id', '=', 'type_volunteers.id')
+            ->where('campaign_id', $campaign->id);
 
         //Validacion de permisos
         $typeUser = TypeUser::where('nombre', 'Sympathizer')->first();
         $user = User::find(Auth::id());
         $currentTypeUser = $user->typeUser()->first();
-        if($currentTypeUser->id === $typeUser->id){
+        if ($currentTypeUser->id === $typeUser->id) {
             $volunteers->where('user_id', $user->id);
         }
 
@@ -96,9 +97,34 @@ class VolunteerController extends Controller
         return response()->json($response);
     }
 
+    public function getAllVolunteersForMobile()
+    {
+        $campaign = Campaign::whereNull('end_date')->first();
+
+        if ($campaign == null) {
+            $response = (object) [
+                'status' => 'error',
+                'message' => 'No se ha creado ninguna campaña'
+            ];
+            return response()->json($response, HttpStatus::HTTP_NOT_ACCEPTABLE);
+        }
+
+        $volunteers = Volunteer::where('campaign_id', $campaign->id)
+            ->where('user_id', Auth::id())
+            ->with(['address', 'auxVolunteer', 'campaign',
+            'section.state',
+            'section.federalDistrict',
+            'section.localDistrict',
+            'section.municipality',
+            ])
+            ->get();
+
+        return response()->json($volunteers);
+    }
+
     public function saveVolunteer(Request $request)
     {
-        if($request->isJson() == false){
+        if ($request->isJson() == false) {
             $response = (object) [
                 'status' => 'error',
                 'message' => 'La peticion debe ser tipo JSON'
@@ -110,7 +136,7 @@ class VolunteerController extends Controller
         //Validaciones
         //State Validation
         $stateValidation = $this->stateValidation($volunteerRequest['section']['state']);
-        if($stateValidation['valid'] == false){
+        if ($stateValidation['valid'] == false) {
             $response = (object) [
                 'entities' => [
                     (object) [
@@ -125,10 +151,11 @@ class VolunteerController extends Controller
         $municipalityValidation = $this->municipalityValidation($volunteerRequest['section']['municipality'], $stateValidation['entity']->id);
         $localDistricValidation = $this->localDistrictValidation($volunteerRequest['section']['localDistrict'], $stateValidation['entity']->id);
         $federalDistricValidation = $this->federalDistrictValidation($volunteerRequest['section']['federalDistrict'], $stateValidation['entity']->id);
-        if($municipalityValidation['valid'] == false
+        if (
+            $municipalityValidation['valid'] == false
             || $localDistricValidation['valid'] == false
             || $federalDistricValidation['valid'] == false
-            ){
+        ) {
             $entities = [];
             $municipalityValidation['valid'] == false ? array_push($entities, (object) [
                 'name' => 'municipality',
@@ -156,7 +183,7 @@ class VolunteerController extends Controller
             $federalDistricValidation['entity']->id,
             $volunteerRequest['section']
         );
-        if($sectionValidation['valid'] == false){
+        if ($sectionValidation['valid'] == false) {
             $response = (object) [
                 'entities' => [
                     (object) [
@@ -193,9 +220,9 @@ class VolunteerController extends Controller
             ]);
 
             $AuxVolunteer = AuxVolunteer::create([
-                //'image_path_ine' => $nameImageCredential,
-                //'image_path_firm' => $nameImageFirm,
-                'birthdate' => Carbon::create($volunteerRequest['birthdate']['year'],$volunteerRequest['birthdate']['month'], $volunteerRequest['birthdate']['day']),
+                'image_path_ine' => $this->parseBase64ToFile($volunteerRequest['imageCredential'], $volunteer->id),
+                'image_path_firm' => $this->parseBase64ToFile($volunteerRequest['imageFirm'], $volunteer->id),
+                'birthdate' => Carbon::create($volunteerRequest['birthdate']['year'], $volunteerRequest['birthdate']['month'], $volunteerRequest['birthdate']['day']),
                 'sector' => $volunteerRequest['sector'],
                 'type_volunteer_id' => $volunteerRequest['type'],
                 'notes' => $volunteerRequest['notes'],
@@ -203,37 +230,68 @@ class VolunteerController extends Controller
                 'local_voting_booth' => $volunteerRequest['localVotingBooth'],
                 'volunteer_id' => $volunteer->id,
             ]);
-            DB::rollBack();
+            DB::commit();
         } catch (\Throwable $th) {
+            $this->deleteImages($volunteer->id);
             DB::rollBack();
-            throw $th;
+            $response = (object) [
+                'status' => 'error',
+                'message' => $th->getMessage()
+            ];
+            return response()->json($response, HttpStatus::HTTP_INTERNAL_SERVER_ERROR);
         }
-        dd($volunteerRequest);
+        $response = (object) [
+            'status' => 'success',
+            'message' => $volunteer->id
+        ];
+        return response()->json($response);
+    }
+
+    private function deleteImages(int $volunteerId)
+    {
+        Storage::disk('private')->deleteDirectory('img'.DIRECTORY_SEPARATOR.'credencials'.DIRECTORY_SEPARATOR.$volunteerId);
+    }
+
+    private function parseBase64ToFile(string $base64Str, int $idVolunteer): string
+    {
+        // Decodificar la cadena base64 a una cadena binaria
+        $image_data = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $base64Str));
+
+        // Generar un nombre de archivo único para la imagen
+        $filename = 'img'.DIRECTORY_SEPARATOR.'credencials'.DIRECTORY_SEPARATOR.$idVolunteer.DIRECTORY_SEPARATOR. uniqid() . '.png';
+
+        // Guardar la imagen en el disco privado de Laravel
+        Storage::disk('private')->put($filename, $image_data);
+
+        // Obtener la ruta completa del archivo guardado
+        $file_path = Storage::disk('private')->path($filename);
+
+        return $file_path;
     }
 
     //Validations
-    private function stateValidation(array $state) : array
+    private function stateValidation(array $state): array
     {
         $stateName = DB::table('states')
-        ->select('id', 'name')
-        ->where('name', 'LIKE', $state['name']);
+            ->select('id', 'name')
+            ->where('name', 'LIKE', $state['name']);
 
         $stateDB = DB::table('states')
-        ->select('id', 'name')
-        ->where('id', $state['id'])
-        ->union($stateName)
-        ->get();
+            ->select('id', 'name')
+            ->where('id', $state['id'])
+            ->union($stateName)
+            ->get();
 
         $result = array();
 
-        switch($stateDB->count()){
+        switch ($stateDB->count()) {
             case 0: //No concuerda ni el ID ni el nombre
                 //estado con ID 0 por peticion del cliente
                 $result['valid'] = false;
                 $result['message'] = 0;
                 return $result;
             case 1: //Al menos 1 de los parametros concuerda
-                if($stateDB[0]->id == $state['id'] && $stateDB[0]->name == $state['name']) {//Si ambos parametros concuerda, pasa
+                if ($stateDB[0]->id == $state['id'] && $stateDB[0]->name == $state['name']) { //Si ambos parametros concuerda, pasa
                     $result['valid'] = true;
                     $result['entity'] = $stateDB[0];
                 } else { //sino error
@@ -249,32 +307,32 @@ class VolunteerController extends Controller
         }
     }
 
-    private function municipalityValidation(array $municipality, int $stateId) : array
+    private function municipalityValidation(array $municipality, int $stateId): array
     {
         $muicipalityName = DB::table('municipalities')
-        ->select('municipalities.id', 'municipalities.number', 'municipalities.name')
-        ->join('sections', 'sections.municipality_id', '=', 'municipalities.id')
-        ->where('name', 'LIKE', $municipality['name'])
-        ->where('sections.state_id', $stateId);
+            ->select('municipalities.id', 'municipalities.number', 'municipalities.name')
+            ->join('sections', 'sections.municipality_id', '=', 'municipalities.id')
+            ->where('name', 'LIKE', $municipality['name'])
+            ->where('sections.state_id', $stateId);
 
         $municipalityDB = DB::table('municipalities')
-        ->select('municipalities.id', 'municipalities.number', 'municipalities.name')
-        ->join('sections', 'sections.municipality_id', '=', 'municipalities.id')
-        ->where('number', $municipality['number'])
-        ->where('sections.state_id', $stateId)
-        ->union($muicipalityName)
-        ->get();
+            ->select('municipalities.id', 'municipalities.number', 'municipalities.name')
+            ->join('sections', 'sections.municipality_id', '=', 'municipalities.id')
+            ->where('number', $municipality['number'])
+            ->where('sections.state_id', $stateId)
+            ->union($muicipalityName)
+            ->get();
 
         $result = array();
 
-        switch($municipalityDB->count()){
+        switch ($municipalityDB->count()) {
             case 0: //No concuerda ni el ID ni el nombre
                 //estado con ID 0 por peticion del cliente
                 $result['valid'] = false;
                 $result['message'] = 0;
                 return $result;
             case 1: //Al menos 1 de los parametros concuerda
-                if($municipalityDB[0]->number == $municipality['number'] && $municipalityDB[0]->name == $municipality['name']) {//Si ambos parametros concuerda, pasa
+                if ($municipalityDB[0]->number == $municipality['number'] && $municipalityDB[0]->name == $municipality['name']) { //Si ambos parametros concuerda, pasa
                     $result['valid'] = true;
                     $result['entity'] = $municipalityDB[0];
                 } else { //sino error
@@ -291,13 +349,13 @@ class VolunteerController extends Controller
         return $result;
     }
 
-    private function localDistrictValidation(array $localDistrict, int $stateId) : array
+    private function localDistrictValidation(array $localDistrict, int $stateId): array
     {
         $result = array();
 
-        if($localDistrict['id'] != 0){
+        if ($localDistrict['id'] != 0) {
             $localDistricDB = LocalDistrict::find($localDistrict['id']);
-            if($localDistricDB->name == $localDistrict['name'] && $localDistricDB->number == $localDistrict['number']){ //Todo concuerda
+            if ($localDistricDB->name == $localDistrict['name'] && $localDistricDB->number == $localDistrict['number']) { //Todo concuerda
                 $result['valid'] = true;
                 $result['entity'] = $localDistricDB;
                 return $result;
@@ -308,26 +366,26 @@ class VolunteerController extends Controller
         }
 
         $localDistricPosible = DB::table('local_districts')
-        ->select('local_districts.id', 'local_districts.number', 'local_districts.name')
-        ->join('sections', 'sections.local_district_id', '=', 'local_districts.id')
-        ->where(function($query) use ($localDistrict){
-            $query->where('name', 'LIKE', $localDistrict['name']);
-            $query->orWhere('number', $localDistrict['number']);
-        })
-        ->where('sections.state_id', $stateId)->first();
+            ->select('local_districts.id', 'local_districts.number', 'local_districts.name')
+            ->join('sections', 'sections.local_district_id', '=', 'local_districts.id')
+            ->where(function ($query) use ($localDistrict) {
+                $query->where('name', 'LIKE', $localDistrict['name']);
+                $query->orWhere('number', $localDistrict['number']);
+            })
+            ->where('sections.state_id', $stateId)->first();
 
         $result['valid'] = false;
         $result['message'] = $localDistricPosible; //El objeto que resulto
         return $result;
     }
 
-    private function federalDistrictValidation(array $federalDistrict, int $stateId) : array
+    private function federalDistrictValidation(array $federalDistrict, int $stateId): array
     {
         $result = array();
 
-        if($federalDistrict['id'] != 0){
+        if ($federalDistrict['id'] != 0) {
             $federalDistrictDB = FederalDistrict::find($federalDistrict['id']);
-            if($federalDistrictDB->name == $federalDistrict['name'] && $federalDistrictDB->number == $federalDistrict['number']){ //Todo concuerda
+            if ($federalDistrictDB->name == $federalDistrict['name'] && $federalDistrictDB->number == $federalDistrict['number']) { //Todo concuerda
                 $result['valid'] = true;
                 $result['entity'] = $federalDistrictDB;
                 return $result;
@@ -338,15 +396,15 @@ class VolunteerController extends Controller
         }
 
         $federalDistrictPosible = DB::table('federal_districts')
-        ->select('federal_districts.id', 'federal_districts.number', 'federal_districts.name')
-        ->join('sections', 'sections.federal_district_id', '=', 'federal_districts.id')
-        ->where(function ($query) use ($federalDistrict) {
-            $query->where('name', 'LIKE', $federalDistrict['name']);
-            $query->orWhere('number', $federalDistrict['number']);
-        })
-        ->where('sections.state_id', $stateId)->first();
+            ->select('federal_districts.id', 'federal_districts.number', 'federal_districts.name')
+            ->join('sections', 'sections.federal_district_id', '=', 'federal_districts.id')
+            ->where(function ($query) use ($federalDistrict) {
+                $query->where('name', 'LIKE', $federalDistrict['name']);
+                $query->orWhere('number', $federalDistrict['number']);
+            })
+            ->where('sections.state_id', $stateId)->first();
 
-        if($federalDistrictPosible != null){
+        if ($federalDistrictPosible != null) {
             $result['valid'] = false;
             $result['message'] = $federalDistrictPosible; //El objeto que resulto
         } else {
@@ -356,13 +414,13 @@ class VolunteerController extends Controller
         return $result;
     }
 
-    private function sectionValidation(int $stateId, int $municipalityId, int $localDistrictId, int $federalDistrictId, array $section) : array
+    private function sectionValidation(int $stateId, int $municipalityId, int $localDistrictId, int $federalDistrictId, array $section): array
     {
         $result = array();
 
-        if($section['id'] != 0) {
+        if ($section['id'] != 0) {
             $sectionDB = Section::find($section['id']);
-            if($sectionDB != null && $sectionDB->section == $section['section']){
+            if ($sectionDB != null && $sectionDB->section == $section['section']) {
                 $result['valid'] = true;
                 $result['entity'] = $sectionDB;
                 return $result;
@@ -373,19 +431,19 @@ class VolunteerController extends Controller
         }
 
         $sectionDB = Section::where('state_id', $stateId)
-        ->where('municipality_id', $municipalityId)
-        ->where('local_district_id', $localDistrictId)
-        ->where('federal_district_id', $federalDistrictId)
-        ->where('section', $section['section'])->first();
-
-        if($sectionDB == null) {
-            $sectionDB = Section::where('state_id', $stateId)
             ->where('municipality_id', $municipalityId)
             ->where('local_district_id', $localDistrictId)
             ->where('federal_district_id', $federalDistrictId)
-            ->first();
+            ->where('section', $section['section'])->first();
 
-            if($sectionDB != null){
+        if ($sectionDB == null) {
+            $sectionDB = Section::where('state_id', $stateId)
+                ->where('municipality_id', $municipalityId)
+                ->where('local_district_id', $localDistrictId)
+                ->where('federal_district_id', $federalDistrictId)
+                ->first();
+
+            if ($sectionDB != null) {
                 $newSection = new Section();
                 $newSection->section = $section['section'];
                 $newSection->new = true;

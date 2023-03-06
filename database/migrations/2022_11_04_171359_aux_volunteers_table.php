@@ -21,7 +21,7 @@ class AuxVolunteersTable extends Migration
             $table->date('birthdate');
             $table->string('notes', 512)->nullable();
             $table->string('sector', 50);
-            $table->string('elector_key', 18)->unique();
+            $table->string('elector_key', 18);
             $table->boolean('local_voting_booth'); // Va a defender la casilla en la seccion
 
             $table->foreignId('volunteer_id')->constrained()->onDelete('cascade');

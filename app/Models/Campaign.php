@@ -19,7 +19,7 @@ class Campaign extends Model
         'end_date'
     ];
 
-    protected $hidden = ['created_at', 'updated_at', 'deleted_at'];
+    protected $hidden = ['created_at', 'updated_at', 'deleted_at', 'img_path'];
 
     public function administrators() {
         return $this->belongsToMany(Administrator::class);

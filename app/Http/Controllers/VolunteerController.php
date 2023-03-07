@@ -384,8 +384,13 @@ class VolunteerController extends Controller
             })
             ->where('sections.state_id', $stateId)->first();
 
-        $result['valid'] = false;
-        $result['message'] = $localDistricPosible; //El objeto que resulto
+        if ($localDistricPosible != null) {
+            $result['valid'] = false;
+            $result['message'] = $localDistricPosible; //El objeto que resulto
+        } else {
+            $result['valid'] = false;
+            $result['message'] = (object) ['id' => 0];
+        }
         return $result;
     }
 

@@ -132,7 +132,7 @@ class VolunteerController extends Controller
             return response()->json($response, HttpStatus::HTTP_BAD_REQUEST);
         }
 
-        $volunteerRequest = $request->json()->get('volunteer');
+        $volunteerRequest = $request->json()->all();
         //Validaciones
         //State Validation
         $stateValidation = $this->stateValidation($volunteerRequest['section']['state']);
@@ -294,7 +294,7 @@ class VolunteerController extends Controller
             case 0: //No concuerda ni el ID ni el nombre
                 //estado con ID 0 por peticion del cliente
                 $result['valid'] = false;
-                $result['message'] = 0;
+                $result['message'] = (object) ['id' => 0];
                 return $result;
             case 1: //Al menos 1 de los parametros concuerda
                 if ($stateDB[0]->id == $state['id'] && $stateDB[0]->name == $state['name']) { //Si ambos parametros concuerda, pasa
@@ -335,7 +335,7 @@ class VolunteerController extends Controller
             case 0: //No concuerda ni el ID ni el nombre
                 //estado con ID 0 por peticion del cliente
                 $result['valid'] = false;
-                $result['message'] = 0;
+                $result['message'] = (object) ['id' => 0];
                 return $result;
             case 1: //Al menos 1 de los parametros concuerda
                 if ($municipalityDB[0]->number == $municipality['number'] && $municipalityDB[0]->name == $municipality['name']) { //Si ambos parametros concuerda, pasa
@@ -415,7 +415,7 @@ class VolunteerController extends Controller
             $result['message'] = $federalDistrictPosible; //El objeto que resulto
         } else {
             $result['valid'] = false;
-            $result['message'] = 0;
+            $result['message'] = (object) ['id' => 0];
         }
         return $result;
     }
@@ -464,7 +464,7 @@ class VolunteerController extends Controller
                 return $result;
             } else {
                 $result['valid'] = false;
-                $result['message'] = 0;
+                $result['message'] = (object) ['id' => 0];
             }
             return $result;
         }

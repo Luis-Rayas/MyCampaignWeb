@@ -310,6 +310,11 @@ class VolunteerController extends Controller
                 $result['valid'] = false;
                 $result['message'] = $stateDB[0]; //El objeto que resulto
                 return $result;
+            default:
+                //envio el primer objeto que encontro
+                $result['valid'] = false;
+                $result['message'] = $stateDB[0]; //El objeto que resulto
+                return $result;
         }
     }
 
@@ -352,7 +357,6 @@ class VolunteerController extends Controller
                 $result['message'] = $municipalityDB[0]; //El objeto que resulto
                 return $result;
         }
-        return $result;
     }
 
     private function localDistrictValidation(array $localDistrict, int $stateId): array

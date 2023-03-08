@@ -35,7 +35,16 @@ class VolunteerController extends Controller
 
     public function show(int $id)
     {
-        return view('volunteers.show');
+        $volunteer = Volunteer::with(['address', 'auxVolunteer', 'campaign',
+        'section.state',
+        'section.federalDistrict',
+        'section.localDistrict',
+        'section.municipality',
+        ])->where('id', $id)->first();
+        dd($volunteer);
+        return view('volunteers.show')->with([
+            'volunteer' => $volunteer
+        ]);
     }
 
     //Api Functions

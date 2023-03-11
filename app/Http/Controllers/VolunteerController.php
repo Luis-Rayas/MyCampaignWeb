@@ -244,6 +244,16 @@ class VolunteerController extends Controller
             }
             //----------------------------------------------
             $campaign = Campaign::whereNull('end_date')->first();
+            if($campaign == null) {
+                $response = (object) [
+                    'entities' => [
+                        (object) [
+                            'name' => 'section',
+                            'message' => 'No hay una campaña vigente donde asociar el voluntario']
+                        ]
+                    ];
+                return response()->json($response, HttpStatus::HTTP_CONFLICT);
+            }
 
             DB::beginTransaction();
             try {

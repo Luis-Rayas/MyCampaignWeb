@@ -114,7 +114,7 @@ class CampaignsController extends Controller
             'partido' => 'required|max:50|alpha:ascii',
             'img_campaign' => 'mimes:jpg,jpeg,png',
             'inicio_campania' => 'required|date',
-            'fin_campania' => 'required|date|after_or_equal:inicio_campania',
+            //'fin_campania' => 'required|date|after_or_equal:inicio_campania',
             'descripcion' => 'nullable|max:255|alpha_spaces',
         ]);
         $validator->validate();

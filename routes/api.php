@@ -44,7 +44,8 @@ Route::middleware('jwt')->prefix('campaigns')->group(function() {
 //Voluntarios
 Route::middleware('jwt')->prefix('volunteers')->group(function() {
     Route::get('/', [VolunteerController::class, 'getAllVolunteers'])->name('api.volunteers.getAllVolunteers');
-    Route::get('/mobile/', [VolunteerController::class, 'getAllVolunteersForMobile'])->name('api.volunteers.getAllVolunteersForMobile');
+    Route::get('/image', [VolunteerController::class, 'getImage'])->name('api.volunteers.getImage');
+    Route::get('/mobile', [VolunteerController::class, 'getAllVolunteersForMobile'])->name('api.volunteers.getAllVolunteersForMobile');
     Route::post('/save', [VolunteerController::class, 'saveVolunteer'])->name('api.volunteers.save');
 });
 

@@ -33,14 +33,14 @@ class AuthController extends Controller
 
         if (Auth::attempt($credentials)) {
             $token = JWTAuth::fromUser(Auth::user());
-            $expiresIn = Carbon::now();
-            $expiresIn->addMinutes(JWTFactory::getTTL());
+            // $expiresIn = Carbon::now();
+            // $expiresIn->addMinutes(JWTFactory::getTTL());
             return response()->json(
                 [
                     'user' => Auth::user(),
                     'token' => $token,
                     'tokenType' => 'bearer',
-                    'expiresIn' => $expiresIn->toDateTimeString()
+                    'expiresIn' => JWTFactory::getTTL()
                 ]
             );
         }

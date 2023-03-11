@@ -27,7 +27,7 @@ class AuxVolunteer extends Model
 
     public function typeVolunteer()
     {
-        return $this->hasOne(TypeUser::class);
+        return $this->belongsTo(TypeVolunteer::class);
     }
     public function volunteer() {
         return $this->belongsTo(Volunteer::class);

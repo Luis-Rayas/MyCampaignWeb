@@ -18,6 +18,7 @@ use Symfony\Component\HttpFoundation\Response as HttpStatus;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 use PHPOpenSourceSaver\JWTAuth\Facades\JWTAuth;
 
 class VolunteerController extends Controller
@@ -35,15 +36,20 @@ class VolunteerController extends Controller
 
     public function show(int $id)
     {
-        $volunteer = Volunteer::with(['address', 'auxVolunteer', 'campaign',
+        $volunteer = Volunteer::with([
+        'address',
+        'auxVolunteer.typeVolunteer',
+        'campaign',
         'section.state',
         'section.federalDistrict',
         'section.localDistrict',
         'section.municipality',
         ])->where('id', $id)->first();
-        dd($volunteer);
+        $token = JWTAuth::fromUser(Auth::user());
+        //dd($volunteer);
         return view('volunteers.show')->with([
-            'volunteer' => $volunteer
+            'volunteer' => $volunteer,
+            'jwt' => $token
         ]);
     }
 
@@ -131,130 +137,170 @@ class VolunteerController extends Controller
         return response()->json($volunteers);
     }
 
+    public function getImage(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'idVolunteer' => 'required|exists:volunteers,id',
+            'image' => 'required|in:ine,firm'
+        ],
+        [
+            'in' => 'El campo tipo debe ser uno de los valores permitidos: \'ine\' o \'firm\'.',
+        ]
+        );
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), HttpStatus::HTTP_BAD_REQUEST);
+        }
+        $volunteerQuery = DB::table('aux_volunteers');
+        $image = null;
+        switch ($request->input('image')) {
+            case 'ine':
+                $volunteerQuery->select('image_path_ine AS path');
+                break;
+
+            case 'firm':
+                $volunteerQuery->select('image_path_firm AS path');
+                break;
+        }
+        $image = $volunteerQuery->where('id', $request->input('idVolunteer'))->first();
+
+        if($image->path == null || !file_exists($image->path)){
+            return response()->json(null, HttpStatus::HTTP_NO_CONTENT);
+        }
+        return response()->download($image->path);
+    }
+
     public function saveVolunteer(Request $request)
     {
-        if ($request->isJson() == false) {
-            $response = (object) [
-                'status' => 'error',
-                'message' => 'La peticion debe ser tipo JSON'
-            ];
-            return response()->json($response, HttpStatus::HTTP_BAD_REQUEST);
-        }
-
-        $volunteerRequest = $request->json()->all();
-        //Validaciones
-        //State Validation
-        $stateValidation = $this->stateValidation($volunteerRequest['section']['state']);
-        if ($stateValidation['valid'] == false) {
-            $response = (object) [
-                'entities' => [
-                    (object) [
-                        'name' => 'state',
-                        'message' => $stateValidation['message']
-                    ]
-                ]
-            ];
-            return response()->json($response, HttpStatus::HTTP_BAD_REQUEST);
-        }
-        //--------------------
-        $municipalityValidation = $this->municipalityValidation($volunteerRequest['section']['municipality'], $stateValidation['entity']->id);
-        $localDistricValidation = $this->localDistrictValidation($volunteerRequest['section']['localDistrict'], $stateValidation['entity']->id);
-        $federalDistricValidation = $this->federalDistrictValidation($volunteerRequest['section']['federalDistrict'], $stateValidation['entity']->id);
-        if (
-            $municipalityValidation['valid'] == false
-            || $localDistricValidation['valid'] == false
-            || $federalDistricValidation['valid'] == false
-        ) {
-            $entities = [];
-            $municipalityValidation['valid'] == false ? array_push($entities, (object) [
-                'name' => 'municipality',
-                'message' => $municipalityValidation['message']
-            ]) : null;
-            $localDistricValidation['valid'] == false ? array_push($entities, (object) [
-                'name' => 'localDistric',
-                'message' => $localDistricValidation['message']
-            ]) : null;
-            $federalDistricValidation['valid'] == false ? array_push($entities, (object) [
-                'name' => 'federalDistric',
-                'message' => $federalDistricValidation['message']
-            ]) : null;
-            $response = (object) [
-                'entities' => $entities
-
-            ];
-            return response()->json($response, HttpStatus::HTTP_BAD_REQUEST);
-        }
-        //Section
-        $sectionValidation = $this->sectionValidation(
-            $stateValidation['entity']->id,
-            $municipalityValidation['entity']->id,
-            $localDistricValidation['entity']->id,
-            $federalDistricValidation['entity']->id,
-            $volunteerRequest['section']
-        );
-        if ($sectionValidation['valid'] == false) {
-            $response = (object) [
-                'entities' => [
-                    (object) [
-                        'name' => 'section',
-                        'message' => $sectionValidation['message']
-                    ]
-                ]
-            ];
-            return response()->json($response, HttpStatus::HTTP_BAD_REQUEST);
-        }
-        //----------------------------------------------
-        $campaign = Campaign::whereNull('end_date')->first();
-
-        DB::beginTransaction();
         try {
-            $volunteer = Volunteer::create([
-                'name' => $volunteerRequest['name'],
-                'fathers_lastname' => $volunteerRequest['fathersLastname'],
-                'mothers_lastname' => $volunteerRequest['mothersLastname'],
-                'email' => $volunteerRequest['email'],
-                'phone' => $volunteerRequest['phone'],
-                'section_id' => $sectionValidation['entity']->id,
-                'user_id' => Auth::id(),
-                'campaign_id' => $campaign->id,
-            ]);
+            if ($request->isJson() == false) {
+                $response = (object) [
+                    'status' => 'error',
+                    'message' => 'La peticion debe ser tipo JSON'
+                ];
+                return response()->json($response, HttpStatus::HTTP_BAD_REQUEST);
+            }
 
-            $address = Address::create([
-                'street' => $volunteerRequest['address']['street'],
-                'external_number' => $volunteerRequest['address']['externalNumber'],
-                'internal_number' => $volunteerRequest['address']['internalNumber'],
-                'suburb' => $volunteerRequest['address']['suburb'],
-                'zipcode' => $volunteerRequest['address']['zipcode'],
-                'volunteer_id' => $volunteer->id,
-            ]);
+            $volunteerRequest = $request->json()->all();
+            //Validaciones
+            //State Validation
+            $stateValidation = $this->stateValidation($volunteerRequest['section']['state']);
+            if ($stateValidation['valid'] == false) {
+                $response = (object) [
+                    'entities' => [
+                        (object) [
+                            'name' => 'state',
+                            'message' => $stateValidation['message']
+                        ]
+                    ]
+                ];
+                return response()->json($response, HttpStatus::HTTP_BAD_REQUEST);
+            }
+            //--------------------
+            $municipalityValidation = $this->municipalityValidation($volunteerRequest['section']['municipality'], $stateValidation['entity']->id);
+            $localDistricValidation = $this->localDistrictValidation($volunteerRequest['section']['localDistrict'], $stateValidation['entity']->id);
+            $federalDistricValidation = $this->federalDistrictValidation($volunteerRequest['section']['federalDistrict'], $stateValidation['entity']->id);
+            if (
+                $municipalityValidation['valid'] == false
+                || $localDistricValidation['valid'] == false
+                || $federalDistricValidation['valid'] == false
+            ) {
+                $entities = [];
+                $municipalityValidation['valid'] == false ? array_push($entities, (object) [
+                    'name' => 'municipality',
+                    'message' => $municipalityValidation['message']
+                ]) : null;
+                $localDistricValidation['valid'] == false ? array_push($entities, (object) [
+                    'name' => 'localDistric',
+                    'message' => $localDistricValidation['message']
+                ]) : null;
+                $federalDistricValidation['valid'] == false ? array_push($entities, (object) [
+                    'name' => 'federalDistric',
+                    'message' => $federalDistricValidation['message']
+                ]) : null;
+                $response = (object) [
+                    'entities' => $entities
 
-            $AuxVolunteer = AuxVolunteer::create([
-                'image_path_ine' => $this->parseBase64ToFile($volunteerRequest['imageCredential'], true),
-                'image_path_firm' => $this->parseBase64ToFile($volunteerRequest['imageFirm'], false),
-                'birthdate' => Carbon::create($volunteerRequest['birthdate']['year'], $volunteerRequest['birthdate']['month'], $volunteerRequest['birthdate']['day']),
-                'sector' => $volunteerRequest['sector'],
-                'type_volunteer_id' => $volunteerRequest['type'],
-                'notes' => $volunteerRequest['notes'],
-                'elector_key' => $volunteerRequest['electorKey'],
-                'local_voting_booth' => $volunteerRequest['localVotingBooth'],
-                'volunteer_id' => $volunteer->id,
-            ]);
-            DB::commit();
-        } catch (\Throwable $th) {
-            $this->deleteImages($AuxVolunteer->image_path_ine);
-            $this->deleteImages($AuxVolunteer->image_path_firm);
-            DB::rollBack();
+                ];
+                return response()->json($response, HttpStatus::HTTP_BAD_REQUEST);
+            }
+            //Section
+            $sectionValidation = $this->sectionValidation(
+                $stateValidation['entity']->id,
+                $municipalityValidation['entity']->id,
+                $localDistricValidation['entity']->id,
+                $federalDistricValidation['entity']->id,
+                $volunteerRequest['section']
+            );
+            if ($sectionValidation['valid'] == false) {
+                $response = (object) [
+                    'entities' => [
+                        (object) [
+                            'name' => 'section',
+                            'message' => $sectionValidation['message']
+                        ]
+                    ]
+                ];
+                return response()->json($response, HttpStatus::HTTP_BAD_REQUEST);
+            }
+            //----------------------------------------------
+            $campaign = Campaign::whereNull('end_date')->first();
+
+            DB::beginTransaction();
+            try {
+                $volunteer = Volunteer::create([
+                    'name' => $volunteerRequest['name'],
+                    'fathers_lastname' => $volunteerRequest['fathersLastname'],
+                    'mothers_lastname' => $volunteerRequest['mothersLastname'],
+                    'email' => $volunteerRequest['email'],
+                    'phone' => $volunteerRequest['phone'],
+                    'section_id' => $sectionValidation['entity']->id,
+                    'user_id' => Auth::id(),
+                    'campaign_id' => $campaign->id,
+                ]);
+
+                $address = Address::create([
+                    'street' => $volunteerRequest['address']['street'],
+                    'external_number' => $volunteerRequest['address']['externalNumber'],
+                    'internal_number' => $volunteerRequest['address']['internalNumber'],
+                    'suburb' => $volunteerRequest['address']['suburb'],
+                    'zipcode' => $volunteerRequest['address']['zipcode'],
+                    'volunteer_id' => $volunteer->id,
+                ]);
+
+                $AuxVolunteer = AuxVolunteer::create([
+                    'image_path_ine' => $this->parseBase64ToFile($volunteerRequest['imageCredential'], true),
+                    'image_path_firm' => $this->parseBase64ToFile($volunteerRequest['imageFirm'], false),
+                    'birthdate' => Carbon::create($volunteerRequest['birthdate']['year'], $volunteerRequest['birthdate']['month'], $volunteerRequest['birthdate']['day']),
+                    'sector' => $volunteerRequest['sector'],
+                    'type_volunteer_id' => $volunteerRequest['type'],
+                    'notes' => $volunteerRequest['notes'],
+                    'elector_key' => $volunteerRequest['electorKey'],
+                    'local_voting_booth' => $volunteerRequest['localVotingBooth'],
+                    'volunteer_id' => $volunteer->id,
+                ]);
+                DB::commit();
+            } catch (\Throwable $th) {
+                $this->deleteImages($AuxVolunteer->image_path_ine);
+                $this->deleteImages($AuxVolunteer->image_path_firm);
+                DB::rollBack();
+                $response = (object) [
+                    'status' => 'error',
+                    'message' => $th->getMessage()
+                ];
+                return response()->json($response, HttpStatus::HTTP_INTERNAL_SERVER_ERROR);
+            }
+            $response = (object) [
+                'status' => 'success',
+                'message' => $volunteer->id
+            ];
+            return response()->json($response);
+        } catch (\Throwable $e){
             $response = (object) [
                 'status' => 'error',
-                'message' => $th->getMessage()
+                'message' => $e->getMessage()
             ];
             return response()->json($response, HttpStatus::HTTP_INTERNAL_SERVER_ERROR);
         }
-        $response = (object) [
-            'status' => 'success',
-            'message' => $volunteer->id
-        ];
-        return response()->json($response);
     }
 
     private function deleteImages(string $path)

@@ -267,9 +267,12 @@ class VolunteerController extends Controller
                     'volunteer_id' => $volunteer->id,
                 ]);
 
-                $AuxVolunteer = AuxVolunteer::create([
-                    'image_path_ine' => $this->parseBase64ToFile($volunteerRequest['imageCredential'], true),
-                    'image_path_firm' => $this->parseBase64ToFile($volunteerRequest['imageFirm'], false),
+                $inePath = $this->parseBase64ToFile($volunteerRequest['imageCredential'], true);
+                $firmPath = $this->parseBase64ToFile($volunteerRequest['imageFirm'], false);
+
+                AuxVolunteer::create([
+                    'image_path_ine' => $inePath,
+                    'image_path_firm' => $firmPath,
                     'birthdate' => Carbon::create($volunteerRequest['birthdate']['year'], $volunteerRequest['birthdate']['month'], $volunteerRequest['birthdate']['day']),
                     'sector' => $volunteerRequest['sector'],
                     'type_volunteer_id' => $volunteerRequest['type'],
@@ -280,8 +283,8 @@ class VolunteerController extends Controller
                 ]);
                 DB::commit();
             } catch (\Throwable $th) {
-                $this->deleteImages($AuxVolunteer->image_path_ine);
-                $this->deleteImages($AuxVolunteer->image_path_firm);
+                $this->deleteImages($inePath);
+                $this->deleteImages($firmPath);
                 DB::rollBack();
                 $response = (object) [
                     'status' => 'error',

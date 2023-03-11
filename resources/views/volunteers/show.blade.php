@@ -182,11 +182,11 @@
                 </div>
                 <div class="row">
                     <div class="form-check">
-                        <input type="checkbox" {{ $volunteer->section->new == null ? 'checked' : '' }} />
+                        <input type="checkbox" {{ $volunteer->section->new == null ? 'checked' : '' }}  onclick="return false;" />
                         <label class="form-check-label">Sección Verificada por INE</label>
                     </div>
                     <div class="form-check">
-                        <input type="checkbox" {{ $volunteer->auxVolunteer->local_voting_booth ? 'checked' : '' }} />
+                        <input type="checkbox" {{ $volunteer->auxVolunteer->local_voting_booth ? 'checked' : '' }} onclick="return false;" />
                         <label class="form-check-label">Va a votar localmente</label>
                     </div>
                 </div>
@@ -241,10 +241,10 @@
                 <h5>Imagenes Asociadas</h5>
                 <div class="row">
                     <div class="col-6">
-                        <button class="btn btn-success btn-lg btn-block">INE</button>
+                        <button class="btn btn-success btn-lg btn-block btnResource">INE</button>
                     </div>
                     <div class="col-6">
-                        <button class="btn btn-success btn-lg btn-block">Firma</button>
+                        <button class="btn btn-success btn-lg btn-block btnResource">Firma</button>
                     </div>
                 </div>
                 </p>
@@ -255,12 +255,12 @@
     </section>
 
     {{-- Modal Image --}}
-    <x-adminlte-modal id="modalCustom" title="Account Policy" size="lg" theme="teal" icon="fas fa-bell"
+    <x-adminlte-modal id="modalCustom" title="Imagen relacionada" size="xl" theme="dark" icon="fa-solid fa-address-card"
         v-centered static-backdrop scrollable>
-        <div style="height:800px;">Read the account policies...</div>
+        <h2 id="modalTitle"></h2>
+        <img src="#" alt="imagen de recurso solicitado" id="imgFile" class="img-fluid"/>
         <x-slot name="footerSlot">
-            <x-adminlte-button class="mr-auto" theme="success" label="Accept" />
-            <x-adminlte-button theme="danger" label="Dismiss" data-dismiss="modal" />
+            <x-adminlte-button theme="primary" label="Cerrar" data-dismiss="modal" />
         </x-slot>
     </x-adminlte-modal>
 @stop

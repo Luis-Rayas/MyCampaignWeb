@@ -161,7 +161,7 @@ class VolunteerController extends Controller
                 $volunteerQuery->select('image_path_firm AS path');
                 break;
         }
-        $image = $volunteerQuery->where('id', $request->input('idVolunteer'))->first();
+        $image = $volunteerQuery->where('volunteer_id', $request->input('idVolunteer'))->first();
 
         if($image->path == null || !file_exists($image->path)){
             return response()->json(null, HttpStatus::HTTP_NO_CONTENT);

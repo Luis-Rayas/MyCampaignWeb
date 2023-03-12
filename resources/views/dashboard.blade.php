@@ -40,7 +40,9 @@
 @stop
 
 @section('footer')
-    <div>Holi</div>
+    <section class="text-center">
+        My Campaign ©
+    </section>
 @stop
 
 @section('css')

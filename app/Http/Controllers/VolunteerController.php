@@ -28,6 +28,10 @@ class VolunteerController extends Controller
      */
     public function index()
     {
+        $campaign = Campaign::whereNull('end_date')->first();
+        if($campaign == null){
+            return redirect()->route('home');
+        }
         $token = JWTAuth::fromUser(Auth::user());
         return view('volunteers.index')->with([
             'jwt' => $token

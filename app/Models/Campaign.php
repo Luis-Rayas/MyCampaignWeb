@@ -21,14 +21,6 @@ class Campaign extends Model
 
     protected $hidden = ['created_at', 'updated_at', 'deleted_at', 'img_path'];
 
-    public function administrators() {
-        return $this->belongsToMany(Administrator::class);
-    }
-
-    public function sympathizers() {
-        return $this->belongsToMany(Sympathizer::class);
-    }
-
     public function volunteers() {
         return $this->hasMany(Volunteer::class);
     }

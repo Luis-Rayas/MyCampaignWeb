@@ -22,11 +22,12 @@ class HomeController extends Controller
                 ->loadCount([
                     'volunteers'
                 ]);
-            $currentCampaign->users = DB::table('users')
-            ->selectRaw('COUNT(type_user_pivot.type_user_id) as num, type_users.nombre')
-            ->join('type_user_pivot', 'users.id', '=', 'type_user_pivot.user_id')
-            ->join('type_users', 'type_users.id', '=', 'type_user_pivot.type_user_id')
-            ->groupBy('type_user_pivot.type_user_id')->get();
+            $currentCampaign->administrators_count = User::whereHas('typeUser', function ($query) {
+                $query->where('nombre', 'Administrator');
+            })->count();
+            $currentCampaign->sympathizers_count = User::whereHas('typeUser', function ($query) {
+                $query->where('nombre', 'Sympathizer');
+            })->count();
         }
         return view('dashboard')->with([
             'campaign' => $currentCampaign

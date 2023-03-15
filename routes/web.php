@@ -97,3 +97,6 @@ Route::middleware('auth')->prefix('profile')->group(function() {
     Route::get('/', [ProfileController::class, 'index'])->name('profile.index');
 });
 
+Route::get('download-apk', [HomeController::class, 'showDownloadApk'])->name('download.apk.view');
+Route::post('download-apk', [HomeController::class, 'downloadApk'])->name('download.apk');
+

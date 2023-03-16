@@ -452,11 +452,26 @@ class VolunteerController extends Controller
             ->join('sections', 'sections.local_district_id', '=', 'local_districts.id')
             ->where(function ($query) use ($localDistrict) {
                 $query->where('name', 'LIKE', $localDistrict['name']);
+                $query->where('number', $localDistrict['number']);
+            })
+            ->where('sections.state_id', $stateId)->first();
+
+        if ( $localDistricPosible != null ) {
+            $result['valid'] = true;
+            $result['entity'] = $localDistricPosible;
+            return $result;
+        }
+
+        $localDistricPosible = DB::table('local_districts')
+            ->select('local_districts.id', 'local_districts.number', 'local_districts.name')
+            ->join('sections', 'sections.local_district_id', '=', 'local_districts.id')
+            ->where(function ($query) use ($localDistrict) {
+                $query->where('name', 'LIKE', $localDistrict['name']);
                 $query->orWhere('number', $localDistrict['number']);
             })
             ->where('sections.state_id', $stateId)->first();
 
-        if ($localDistricPosible != null) {
+        if ( $localDistricPosible != null) {
             $result['valid'] = false;
             $result['message'] = $localDistricPosible; //El objeto que resulto
         } else {
@@ -479,6 +494,21 @@ class VolunteerController extends Controller
             }
             $result['valid'] = false;
             $result['message'] = $federalDistrictDB;
+            return $result;
+        }
+
+        $federalDistrictPosible = DB::table('federal_districts')
+            ->select('federal_districts.id', 'federal_districts.number', 'federal_districts.name')
+            ->join('sections', 'sections.federal_district_id', '=', 'federal_districts.id')
+            ->where(function ($query) use ($federalDistrict) {
+                $query->where('name', 'LIKE', $federalDistrict['name']);
+                $query->where('number', $federalDistrict['number']);
+            })
+            ->where('sections.state_id', $stateId)->first();
+
+        if ($federalDistrictPosible != null) {
+            $result['valid'] = true;
+            $result['entity'] = $federalDistrictPosible;
             return $result;
         }
 

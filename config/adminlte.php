@@ -381,6 +381,13 @@ return [
             'route'  => 'municipality.index',
             'icon' => 'fa-solid fa-flag'
         ],
+        [
+            'text' => 'Aplicación Móvil',
+            'icon' => 'fa-solid fa-qrcode',
+            'route' => 'download.apk.view',
+            'label' => 'App',
+            'label_color' => 'success',
+        ],
     ],
 
     /*

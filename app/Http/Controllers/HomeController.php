@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Campaign;
 use App\Models\User;
+use Illuminate\Support\Facades\Storage;
 
 class HomeController extends Controller
 {
@@ -35,5 +36,11 @@ class HomeController extends Controller
     public function showDownloadApk()
     {
         return view('download-apk');
+    }
+
+    public function downloadApk()
+    {
+        $apk = Storage::disk('public')->path('/files/base.apk');
+        return response()->download($apk, 'myCampaign.apk');
     }
 }

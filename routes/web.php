@@ -95,8 +95,9 @@ Route::middleware('auth')->prefix('volunteers')->group(function() {
 
 Route::middleware('auth')->prefix('profile')->group(function() {
     Route::get('/', [ProfileController::class, 'index'])->name('profile.index');
+    Route::post('/update-password', [ProfileController::class, 'updatePassword'])->name('profile.password.update');
 });
 
 Route::get('download-apk', [HomeController::class, 'showDownloadApk'])->name('download.apk.view');
-Route::post('download-apk', [HomeController::class, 'downloadApk'])->name('download.apk');
+Route::get('download-file-apk', [HomeController::class, 'downloadApk'])->name('download.apk');
 

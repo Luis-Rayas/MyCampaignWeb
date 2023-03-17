@@ -20,8 +20,8 @@
                 <p class="text-wrap">Sabemos la importancia de la seguridad, por lo que te recomendamos
                     descargar nuestra aplicacion solamente de nuestro sitio web.</p>
                 <div class="visible-print text-center">
-                    {!! QrCode::size(100)->generate(Request::url()) !!}
-                    <p>O has click <a href="#">aqui</a> para ir a la descarga directa</p>
+                    {!! QrCode::size(100)->generate(route('download.apk')) !!}
+                    <p>O has click <a href="{{route('download.apk')}}">aqui</a> para ir a la descarga directa</p>
                 </div>
                 <hr
                     style="border: 0; height: 1px; background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0));" />

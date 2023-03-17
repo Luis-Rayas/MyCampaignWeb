@@ -574,8 +574,17 @@ class VolunteerController extends Controller
                 $result['entity'] = $newSection;
                 return $result;
             } else {
-                $result['valid'] = false;
-                $result['message'] = (object) ['id' => 0];
+                $sectionDB = Section::where('state_id', $stateId)
+                    ->where('section', $section['section'])
+                    ->with(['state','municipality','localDistrict','federalDistrict'])
+                    ->first();
+                if ( $sectionDB == null ) {
+                    $result['valid'] = false;
+                    $result['message'] = (object) ['id' => 0];
+                } else {
+                    $result['valid'] = false;
+                    $result['message'] = $sectionDB;
+                }
             }
             return $result;
         }

@@ -66,12 +66,12 @@ class CampaignsController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'nombre' => 'required|max:255|alpha_spaces',
-            'partido' => 'required|max:50|alpha:ascii',
+            'nombre' => 'required|max:255',
+            'partido' => 'required|max:50',
             'img_campaign' => 'mimes:jpg,jpeg,png',
             'inicio_campania' => 'required|date',
             // 'fin_campania' => 'required|date|after_or_equal:inicio_campania',
-            'descripcion' => 'nullable|max:255|alpha_spaces',
+            'descripcion' => 'nullable|max:255',
         ]);
         $validator->validate();
         $safe = $validator->validated();
@@ -110,12 +110,12 @@ class CampaignsController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'id' => 'required|exists:campaigns,id',
-            'nombre' => 'required|max:255|alpha_spaces',
-            'partido' => 'required|max:50|alpha:ascii',
+            'nombre' => 'required|max:255',
+            'partido' => 'required|max:50',
             'img_campaign' => 'mimes:jpg,jpeg,png',
             'inicio_campania' => 'required|date',
             //'fin_campania' => 'required|date|after_or_equal:inicio_campania',
-            'descripcion' => 'nullable|max:255|alpha_spaces',
+            'descripcion' => 'nullable|max:255',
         ]);
         $validator->validate();
         $safe = $validator->validated();

@@ -13,7 +13,7 @@
         <div class="row">
             <div class="col-md-4">
                 <x-adminlte-small-box title="{{ $campaign->volunteers_count }}" text="Voluntarios registrados"
-                    icon="fas fa-users text-white" theme="purple" url="{{ route('sympathizer.index') }}"
+                    icon="fas fa-users text-white" theme="purple" url="{{ route('volunteers.index') }}"
                     url-text="Ver detalles..." />
             </div>
             <div class="col-md-4">

@@ -20,7 +20,8 @@
                 <p class="text-wrap">Sabemos la importancia de la seguridad, por lo que te recomendamos
                     descargar nuestra aplicacion solamente de nuestro sitio web.</p>
                 <div class="visible-print text-center">
-                    {!! QrCode::size(100)->generate(route('download.apk')) !!}
+                    {{-- {!! QrCode::size(100)->generate(route('download.apk')) !!} --}}
+                    <img src="{{ asset('storage/img/qr.png') }}" alt="QR image" />
                     <p>O has click <a href="{{route('download.apk')}}">aqui</a> para ir a la descarga directa</p>
                 </div>
                 <hr
